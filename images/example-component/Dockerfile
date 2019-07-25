@@ -13,22 +13,24 @@ RUN yum install -y \
         wget \
         git
 
-ARG GO_VERSION=1.12.4
+ARG GO_VERSION=1.12.7
 
 RUN wget https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz && \
     tar -C / -xzf go${GO_VERSION}.linux-amd64.tar.gz
 
 ENV GOROOT=/go \
-    GOPATH=/go \
-    PATH="${PATH}:${GOROOT}/bin"
+    GOPATH=/app
 
-RUN mkdir -p /go/src/prometheus && \
+ENV PATH="${PATH}:${GOROOT}/bin"
+
+RUN mkdir -p /app/src/prometheus && \
     git clone https://github.com/prometheus/client_golang.git \
-        /go/src/prometheus/client_golang
+        /app/src/prometheus/client_golang
 
-WORKDIR /go/src/prometheus/client_golang/examples/random
+WORKDIR /app/src/prometheus/client_golang/examples/random
 
-RUN go get -d -v && \
+ENV GO111MODULE=on
+RUN GOPROXY=https://proxy.golang.org go get -d -v && \
     go build -v -o /bin/main
 
 
