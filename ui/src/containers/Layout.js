@@ -4,14 +4,20 @@ import { injectIntl } from 'react-intl';
 import { ThemeProvider } from 'styled-components';
 import { matchPath } from 'react-router';
 import { Layout as CoreUILayout } from '@scality/core-ui';
-import { withRouter, Switch } from 'react-router-dom';
+import { withRouter, Switch, Route } from 'react-router-dom';
 
 import Welcome from '../components/Welcome';
 import PrivateRoute from './PrivateRoute';
-import { logoutAction } from '../ducks/login';
 import { toggleSidebarAction } from '../ducks/app/layout';
+import CallbackPage from './LoginCallback';
+import userManager from '../utils/userManager';
 
 class Layout extends Component {
+  logout(event) {
+    event.preventDefault();
+    userManager.removeUser(); // removes the user data from sessionStorage
+  }
+
   render() {
     const applications = [];
 
@@ -23,13 +29,6 @@ class Layout extends Component {
         }
       }
     ];
-
-    const user = {
-      name: this.props.user && this.props.user.username,
-      actions: [
-        { label: this.props.intl.messages.log_out, onClick: this.props.logout }
-      ]
-    };
 
     const sidebar = {
       expanded: this.props.sidebar.expanded,
@@ -49,13 +48,23 @@ class Layout extends Component {
       ]
     };
 
+    const user = {
+      name:
+        this.props.user &&
+        this.props.user.profile &&
+        this.props.user.profile.name + ' ' + this.props.user.profile.email,
+      actions: [
+        { label: this.props.intl.messages.log_out, onClick: this.logout }
+      ]
+    };
+
     const navbar = {
       onToggleClick: this.props.toggleSidebar,
       toggleVisible: true,
       productName: this.props.intl.messages.product_name,
       applications,
       help,
-      user: this.props.user && user,
+      user: this.props.user ? user : null,
       logo: (
         <img
           alt="logo"
@@ -70,6 +79,7 @@ class Layout extends Component {
           <Switch>
             <PrivateRoute exact path="/about" component={Welcome} />
             <PrivateRoute exact path="/" component={Welcome} />
+            <Route exact path="/callback" component={CallbackPage} />
           </Switch>
         </CoreUILayout>
       </ThemeProvider>
@@ -78,14 +88,13 @@ class Layout extends Component {
 }
 
 const mapStateToProps = state => ({
-  user: state.login.user,
+  user: state.oidc.user,
   sidebar: state.app.layout.sidebar,
   theme: state.config.theme
 });
 
 const mapDispatchToProps = dispatch => {
   return {
-    logout: () => dispatch(logoutAction()),
     toggleSidebar: () => dispatch(toggleSidebarAction())
   };
 };

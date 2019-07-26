@@ -1,6 +1,5 @@
 import { call, put } from 'redux-saga/effects';
 import { fetchTheme, SET_THEME, fetchConfig, SET_API_CONFIG } from './config';
-import { fetchUserInfo } from './login';
 
 import * as Api from '../services/api';
 
@@ -33,6 +32,4 @@ it('update the config state when fetchConfig', () => {
   expect(gen.next(result).value).toEqual(
     put({ type: SET_API_CONFIG, payload: result })
   );
-
-  expect(gen.next().value).toEqual(call(fetchUserInfo));
 });

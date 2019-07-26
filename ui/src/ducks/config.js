@@ -2,7 +2,6 @@ import { call, put, takeEvery } from 'redux-saga/effects';
 import { mergeTheme } from '@scality/core-ui/dist/utils';
 import * as defaultTheme from '@scality/core-ui/dist/style/theme';
 import * as Api from '../services/api';
-import { fetchUserInfo } from './login';
 
 // Actions
 const SET_LANG = 'SET_LANG';
@@ -67,7 +66,6 @@ export function* fetchConfig() {
   if (!result.error) {
     yield call(fetchTheme);
     yield put(setApiConfigAction(result));
-    yield call(fetchUserInfo);
   }
 }
 
