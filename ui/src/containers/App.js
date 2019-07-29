@@ -10,6 +10,7 @@ import translations_en from '../translations/en';
 import translations_fr from '../translations/fr';
 
 import Layout from './Layout';
+import Loader from '../components/Loader';
 
 import { fetchConfigAction } from '../ducks/config';
 
@@ -27,12 +28,14 @@ class App extends Component {
   }
 
   render() {
-    const { language } = this.props.config;
+    const { language, api, theme } = this.props.config;
 
-    return (
+    return api && theme ? (
       <IntlProvider locale={language} messages={messages[language]}>
         <Layout />
       </IntlProvider>
+    ) : (
+      <Loader />
     );
   }
 }

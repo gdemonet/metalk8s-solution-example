@@ -7,6 +7,7 @@ import { Layout as CoreUILayout } from '@scality/core-ui';
 import { withRouter, Switch, Route } from 'react-router-dom';
 
 import Welcome from '../components/Welcome';
+import NodesList from '../containers/NodeList';
 import PrivateRoute from './PrivateRoute';
 import { toggleSidebarAction } from '../ducks/app/layout';
 import CallbackPage from './LoginCallback';
@@ -78,7 +79,7 @@ class Layout extends Component {
         <CoreUILayout sidebar={sidebar} navbar={navbar}>
           <Switch>
             <PrivateRoute exact path="/about" component={Welcome} />
-            <PrivateRoute exact path="/" component={Welcome} />
+            <PrivateRoute exact path="/" component={NodesList} />
             <Route exact path="/callback" component={CallbackPage} />
           </Switch>
         </CoreUILayout>

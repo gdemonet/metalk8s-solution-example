@@ -3,11 +3,13 @@ import { reducer as oidcReducer } from 'redux-oidc';
 
 import config from './config';
 import layout from './app/layout';
+import nodes from './app/nodes';
 
 const rootReducer = combineReducers({
   config,
   app: combineReducers({
-    layout
+    layout,
+    nodes
   }),
   oidc: oidcReducer
 });
