@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { withRouter, Route } from 'react-router-dom';
-import userManager from '../utils/userManager';
 
 class PrivateRoute extends Component {
   state = {};
   static getDerivedStateFromProps(props) {
     if (!props.isLoadingUser && !props.authenticated) {
-      userManager.signinRedirect({ data: { path: window.location.pathname } }); //Go to Dex Login Form if not authenticated
+      props.userManager.signinRedirect({
+        data: { path: window.location.pathname }
+      }); //Go to Dex Login Form if not authenticated
     }
     return null;
   }
@@ -28,7 +29,8 @@ class PrivateRoute extends Component {
 function mapStateToProps(state) {
   return {
     authenticated: !!state.oidc.user,
-    isLoadingUser: state.oidc.isLoadingUser
+    isLoadingUser: state.oidc.isLoadingUser,
+    userManager: state.config.userManager
   };
 }
 

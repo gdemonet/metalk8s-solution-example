@@ -11,12 +11,11 @@ import NodesList from '../containers/NodeList';
 import PrivateRoute from './PrivateRoute';
 import { toggleSidebarAction } from '../ducks/app/layout';
 import CallbackPage from './LoginCallback';
-import userManager from '../utils/userManager';
 
 class Layout extends Component {
   logout(event) {
     event.preventDefault();
-    userManager.removeUser(); // removes the user data from sessionStorage
+    this.props.userManager.removeUser(); // removes the user data from sessionStorage
   }
 
   render() {
@@ -91,7 +90,8 @@ class Layout extends Component {
 const mapStateToProps = state => ({
   user: state.oidc.user,
   sidebar: state.app.layout.sidebar,
-  theme: state.config.theme
+  theme: state.config.theme,
+  userManager: state.config.userManager
 });
 
 const mapDispatchToProps = dispatch => {

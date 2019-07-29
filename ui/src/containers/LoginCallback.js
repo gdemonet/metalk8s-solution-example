@@ -1,14 +1,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { CallbackComponent } from 'redux-oidc';
-import userManager from '../utils/userManager';
 import { updateAPIConfigAction } from '../ducks/config';
 
 class CallbackPage extends React.Component {
   render() {
     return (
       <CallbackComponent
-        userManager={userManager}
+        userManager={this.props.userManager}
         successCallback={user => {
           this.props.updateAPIConfig(user);
           const path = (user.state && user.state.path) || '/';
@@ -25,6 +24,12 @@ class CallbackPage extends React.Component {
   }
 }
 
+function mapStateToProps(state) {
+  return {
+    userManager: state.config.userManager
+  };
+}
+
 const mapDispatchToProps = dispatch => {
   return {
     updateAPIConfig: user => dispatch(updateAPIConfigAction(user))
@@ -32,6 +37,6 @@ const mapDispatchToProps = dispatch => {
 };
 
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(CallbackPage);
