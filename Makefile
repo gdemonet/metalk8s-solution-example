@@ -158,10 +158,9 @@ ui: $(UI_TARGETS)
 .PHONY: ui
 
 $(ISO_ROOT)/ui/%.yaml: $(UI_SRC)/deploy/%.yaml
-	@echo Copy $< to $@.
+	@echo Render $< into $@.
 	@mkdir -p $(@D)
-	@rm -f $@
-	@cp -a $< $@
+	@sed -e 's/@VERSION@/$(VERSION_FULL)/' -e 's/@REPOSITORY@/$(TODO)/' $< > $@
 
 # Operator manifests
 OPERATOR_MANIFESTS := $(wildcard \
