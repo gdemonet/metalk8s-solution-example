@@ -1,6 +1,6 @@
 # Base image configuration
 # SHA256 digest of the image
-ARG EXAMPLE_IMAGE_SHA256
+ARG EXAMPLE_IMAGE_SHA256=6ae4cddb2b37f889afd576a17a5286b311dcbf10a904409670827f6f9b50065e
 ARG EXAMPLE_IMAGE=docker.io/centos
 
 
