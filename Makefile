@@ -143,6 +143,7 @@ $(ISO_ROOT)/registry-config.inc.j2: $(BUILD_ROOT)/images/.deduplicated
 	$(REGISTRY_SCRIPT) \
 		--name-prefix '{{ repository }}' \
 		--server-root '{{ registry_root }}' \
+		--omit-constants \
 		$(IMAGES_ROOT) > $@
 	@echo Generated NGINX registry configuration.
 
