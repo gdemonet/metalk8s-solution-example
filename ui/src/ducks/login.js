@@ -1,6 +1,6 @@
 import { call, takeEvery, put, select } from 'redux-saga/effects';
-import * as Api from '../services/api';
 import history from '../history';
+import * as ApiK8s from '../services/k8s/api';
 
 // Actions
 const AUTHENTICATE = 'AUTHENTICATE';
@@ -72,7 +72,11 @@ export function* authenticate({ payload }) {
   const token = btoa(username + ':' + password); //base64Encode
   const api_server = yield select(state => state.config.api);
 
+<<<<<<< HEAD
   const result = yield call(Api.authenticate, token, api_server);
+=======
+  const result = yield call(ApiK8s.authenticate, token);
+>>>>>>> intergate UI
   if (result.error) {
     yield put({
       type: AUTHENTICATION_FAILED,
@@ -87,6 +91,10 @@ export function* authenticate({ payload }) {
         token
       })
     );
+<<<<<<< HEAD
+=======
+    yield call(ApiK8s.updateApiServerConfig, api_server.url, token);
+>>>>>>> intergate UI
     yield call(history.push, '/');
   }
   yield put(setUserInfoLoadedAction(true));
@@ -111,6 +119,11 @@ export function* fetchUserInfo() {
         token
       })
     );
+<<<<<<< HEAD
+=======
+    const api_server = yield select(state => state.config.api);
+    yield call(ApiK8s.updateApiServerConfig, api_server.url, token);
+>>>>>>> intergate UI
   } else {
     yield call(history.push, '/login');
   }

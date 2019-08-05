@@ -6,6 +6,10 @@ import { matchPath } from 'react-router';
 import { Layout as CoreUILayout } from '@scality/core-ui';
 import { withRouter, Switch } from 'react-router-dom';
 
+import CustomResource from './CustomResource';
+import NamespacesCreateForm from './NamespacesCreation';
+import CustomresourceCreation from './CustomresourceCreation';
+
 import Welcome from '../components/Welcome';
 import PrivateRoute from './PrivateRoute';
 import { logoutAction } from '../ducks/login';
@@ -69,7 +73,22 @@ class Layout extends Component {
         <CoreUILayout sidebar={sidebar} navbar={navbar}>
           <Switch>
             <PrivateRoute exact path="/about" component={Welcome} />
-            <PrivateRoute exact path="/" component={Welcome} />
+            <PrivateRoute
+              exact
+              path="/customResource"
+              component={CustomResource}
+            />
+            <PrivateRoute
+              exact
+              path="/customResource/create"
+              component={CustomresourceCreation}
+            />
+            <PrivateRoute
+              exact
+              path="/namespaces/create"
+              component={NamespacesCreateForm}
+            />
+            <PrivateRoute exact path="/" component={CustomResource} />
           </Switch>
         </CoreUILayout>
       </ThemeProvider>

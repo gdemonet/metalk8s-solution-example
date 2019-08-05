@@ -1,9 +1,19 @@
 {
+<<<<<<< HEAD
   "product_name": "Scality Template UI",
+=======
+  "product_name": "Scality Solution UI",
+>>>>>>> intergate UI
   "username": "Username",
   "password": "Password",
   "submit": "Submit",
   "about": "About",
   "log_out": "Log out",
-  "nodes": "Nodes"
+  "nodes": "Nodes",
+  "create_new_namespaces": "Create New Namespace",
+  "create_new_customResource": "Create New Custom Resource",
+  "operator_version": "Operator Version",
+  "name": "Name",
+  "cancel": "Cancel",
+  "create": "Create"
 }
