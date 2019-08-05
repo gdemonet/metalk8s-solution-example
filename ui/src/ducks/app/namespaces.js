@@ -37,7 +37,12 @@ export const createNamespacesAction = payload => {
 
 // Sagas
 export function* createNamespaces({ payload }) {
-  yield call(ApiK8s.createNamespace, payload);
+  const body = {
+    metadata: {
+      name: payload.name
+    }
+  };
+  yield call(ApiK8s.createNamespace, body);
 }
 
 export function* fetchNamespaces() {

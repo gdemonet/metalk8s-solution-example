@@ -51,9 +51,9 @@ export async function createCustomResource(body) {
   }
 }
 
-export async function createNamespace(payload) {
+export async function createNamespace(body) {
   try {
-    return await coreV1.createNamespace(payload);
+    return await coreV1.createNamespace(body);
   } catch (error) {
     return { error };
   }
