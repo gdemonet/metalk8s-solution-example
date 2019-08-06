@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
@@ -7,8 +7,6 @@ import { Table, Button } from '@scality/core-ui';
 import { padding } from '@scality/core-ui/dist/style/theme';
 import { sortSelector } from '../services/utils';
 import NoRowsRenderer from '../components/NoRowsRenderer';
-import { fetchCustomResourceAction } from '../ducks/app/customResource';
-import { fetchNamespacesAction } from '../ducks/app/namespaces';
 
 const PageContainer = styled.div`
   box-sizing: border-box;
@@ -32,11 +30,6 @@ const TableContainer = styled.div`
 `;
 
 const CustomResource = props => {
-  useEffect(() => {
-    props.fetchNamespaces();
-    props.fetchCustomResource();
-  });
-
   const [sortBy, setSortBy] = useState('name');
   const [sortDirection, setSortDirection] = useState('ASC');
   const { intl, history, customResource } = props;
@@ -116,18 +109,4 @@ function mapStateToProps(state) {
   };
 }
 
-const mapDispatchToProps = dispatch => {
-  return {
-    fetchNamespaces: () => dispatch(fetchNamespacesAction()),
-    fetchCustomResource: () => dispatch(fetchCustomResourceAction())
-  };
-};
-
-export default injectIntl(
-  withRouter(
-    connect(
-      mapStateToProps,
-      mapDispatchToProps
-    )(CustomResource)
-  )
-);
+export default injectIntl(withRouter(connect(mapStateToProps)(CustomResource)));
