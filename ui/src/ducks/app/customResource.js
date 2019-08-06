@@ -1,6 +1,7 @@
-import { call, takeEvery } from 'redux-saga/effects';
+import { call, put, takeEvery } from 'redux-saga/effects';
 
 import * as ApiK8s from '../../services/k8s/api';
+import history from '../../history';
 
 // Actions
 const FETCH_CUSTOM_RESOURCE = 'FETCH_CUSTOM_RESOURCE';
@@ -39,14 +40,25 @@ export const createCustomresourceAction = payload => {
 export function* refreshCustomResource() {
   const results = yield call(ApiK8s.getCustomResource);
   if (!results.error) {
-    yield call(updateCustomResourceAction, { list: results.body.items });
+    yield put(
+      updateCustomResourceAction({
+        list: results.body.items.map(cr => {
+          return {
+            name: cr.metadata.name,
+            namespace: cr.metadata.namespace,
+            replicas: cr.spec.replicas,
+            version: cr.spec.version
+          };
+        })
+      })
+    );
   }
 }
 export function* createCustomResource({ payload }) {
-  const { name, ...rest } = payload;
+  const { name, namespaces, ...rest } = payload;
   const body = {
-    apiVersion: 'example.solution.com/v1alpha1',
-    kind: 'examples',
+    apiVersion: 'solution.com/v1alpha1',
+    kind: 'Example',
     metadata: {
       name: name
     },
@@ -54,7 +66,10 @@ export function* createCustomResource({ payload }) {
       ...rest
     }
   };
-  yield call(ApiK8s.createCustomResource, body);
+  const result = yield call(ApiK8s.createCustomResource, body, namespaces);
+  if (!result.error) {
+    yield call(history.push, `/customResource`);
+  }
 }
 export function* customResourceSaga() {
   yield takeEvery(FETCH_CUSTOM_RESOURCE, refreshCustomResource);
