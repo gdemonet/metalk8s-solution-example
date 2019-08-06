@@ -6,7 +6,7 @@ import * as Yup from 'yup';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import { Button, Input } from '@scality/core-ui';
-import { padding, gray } from '@scality/core-ui/dist/style/theme';
+import { padding, gray, fontSize } from '@scality/core-ui/dist/style/theme';
 import { isEmpty } from 'lodash';
 import { createCustomresourceAction } from '../ducks/app/customResource';
 
@@ -31,6 +31,21 @@ const CreateCustomresourceLayout = styled.div`
   }
 `;
 
+const SelectLabel = styled.label`
+  width: 200px;
+  padding: 10px;
+  font-size: ${fontSize.base};
+`;
+
+const SelectFieldContainer = styled.div`
+  display: inline-flex;
+  align-items: center;
+`;
+
+const SelectField = styled.select`
+  width: 200px;
+`;
+
 const ActionContainer = styled.div`
   display: flex;
   margin: ${padding.large} 0;
@@ -52,19 +67,23 @@ const FormSection = styled.div`
   flex-direction: column;
 `;
 
-const initialValues = {
-  name: '',
-  operator_version: ''
-};
-
 const validationSchema = Yup.object().shape({
-  name: Yup.string().required(),
-  operator_version: Yup.string().required()
+  namespaces: Yup.string().required(),
+  version: Yup.string().required(),
+  replicas: Yup.number().required(),
+  name: Yup.string().required()
 });
 
 class CustomresourceCreationForm extends React.Component {
   render() {
-    const { intl } = this.props;
+    const { intl, namespaces } = this.props;
+    const initialValues = {
+      namespaces: namespaces.length ? namespaces[0].metadata.name : '',
+      version: '',
+      replicas: '',
+      name: ''
+    };
+
     return (
       <CreateCustomresourceContainter>
         <CreateCustomresourceLayout>
@@ -109,14 +128,40 @@ class CustomresourceCreationForm extends React.Component {
                       error={touched.name && errors.name}
                       onBlur={handleOnBlur}
                     />
+                    <SelectFieldContainer>
+                      <SelectLabel>{intl.messages.namespaces}</SelectLabel>
+                      <SelectField
+                        name="namespaces"
+                        onChange={handleChange('namespaces')}
+                        value={values.namespaces}
+                        error={touched.namespaces && errors.namespaces}
+                        onBlur={handleOnBlur}
+                      >
+                        {namespaces.map((namespace, idx) => (
+                          <option
+                            key={`namespace_${idx}`}
+                            value={namespace.metadata.name}
+                          >
+                            {namespace.metadata.name}
+                          </option>
+                        ))}
+                      </SelectField>
+                    </SelectFieldContainer>
                     <Input
-                      name="operator_version"
-                      label={intl.messages.operator_version}
-                      value={values.operator_version}
-                      onChange={handleChange('operator_version')}
-                      error={
-                        touched.operator_version && errors.operator_version
-                      }
+                      name="version"
+                      label={intl.messages.version}
+                      value={values.version}
+                      onChange={handleChange('version')}
+                      error={touched.version && errors.version}
+                      onBlur={handleOnBlur}
+                    />
+
+                    <Input
+                      name="replicas"
+                      label={intl.messages.replicas}
+                      value={values.replicas}
+                      onChange={handleChange('replicas')}
+                      error={touched.replicas && errors.replicas}
                       onBlur={handleOnBlur}
                     />
 
@@ -150,6 +195,12 @@ class CustomresourceCreationForm extends React.Component {
   }
 }
 
+function mapStateToProps(state) {
+  return {
+    namespaces: state.app.namespaces.list
+  };
+}
+
 const mapDispatchToProps = dispatch => {
   return {
     createCustomresource: body => dispatch(createCustomresourceAction(body))
@@ -159,7 +210,7 @@ const mapDispatchToProps = dispatch => {
 export default injectIntl(
   withRouter(
     connect(
-      null,
+      mapStateToProps,
       mapDispatchToProps
     )(CustomresourceCreationForm)
   )

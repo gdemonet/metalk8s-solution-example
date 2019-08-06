@@ -43,9 +43,18 @@ export function* refreshCustomResource() {
   }
 }
 export function* createCustomResource({ payload }) {
-  const result = yield call(ApiK8s.createCustomResource, payload);
-  if (!result.error) {
-  }
+  const { name, ...rest } = payload;
+  const body = {
+    apiVersion: 'example.solution.com/v1alpha1',
+    kind: 'examples',
+    metadata: {
+      name: name
+    },
+    spec: {
+      ...rest
+    }
+  };
+  yield call(ApiK8s.createCustomResource, body);
 }
 export function* customResourceSaga() {
   yield takeEvery(FETCH_CUSTOM_RESOURCE, refreshCustomResource);

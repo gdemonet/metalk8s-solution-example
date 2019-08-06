@@ -15,5 +15,8 @@
   "operator_version": "Operator Version",
   "name": "Name",
   "cancel": "Cancel",
-  "create": "Create"
+  "create": "Create",
+  "namespaces": "Namespaces",
+  "version": "Version",
+  "replicas": "Replicas"
 }

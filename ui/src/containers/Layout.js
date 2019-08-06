@@ -9,6 +9,8 @@ import { withRouter, Switch } from 'react-router-dom';
 import CustomResource from './CustomResource';
 import NamespacesCreateForm from './NamespacesCreation';
 import CustomresourceCreation from './CustomresourceCreation';
+import { fetchCustomResourceAction } from '../ducks/app/customResource';
+import { fetchNamespacesAction } from '../ducks/app/namespaces';
 
 import Welcome from '../components/Welcome';
 import PrivateRoute from './PrivateRoute';
@@ -16,6 +18,11 @@ import { logoutAction } from '../ducks/login';
 import { toggleSidebarAction } from '../ducks/app/layout';
 
 class Layout extends Component {
+  componentDidMount() {
+    this.props.fetchNamespaces();
+    this.props.fetchCustomResource();
+  }
+
   render() {
     const applications = [];
 
@@ -105,7 +112,9 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => {
   return {
     logout: () => dispatch(logoutAction()),
-    toggleSidebar: () => dispatch(toggleSidebarAction())
+    toggleSidebar: () => dispatch(toggleSidebarAction()),
+    fetchNamespaces: () => dispatch(fetchNamespacesAction()),
+    fetchCustomResource: () => dispatch(fetchCustomResourceAction())
   };
 };
 
