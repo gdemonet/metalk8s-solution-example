@@ -21,6 +21,14 @@ class Layout extends Component {
   componentDidMount() {
     this.props.fetchNamespaces();
     this.props.fetchCustomResource();
+
+    this.interval = setInterval(() => {
+      this.props.fetchCustomResource();
+    }, 10000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
   }
 
   render() {
