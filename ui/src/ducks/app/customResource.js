@@ -69,6 +69,7 @@ export function* createCustomResource({ payload }) {
   };
   const result = yield call(ApiK8s.createCustomResource, body, namespaces);
   if (!result.error) {
+    yield call(refreshCustomResource);
     yield call(history.push, `/customResource`);
   }
 }

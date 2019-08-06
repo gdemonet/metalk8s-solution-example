@@ -42,7 +42,10 @@ export function* createNamespaces({ payload }) {
       name: payload.name
     }
   };
-  yield call(ApiK8s.createNamespace, body);
+  const result = yield call(ApiK8s.createNamespace, body);
+  if (!result.error) {
+    yield call(fetchNamespaces);
+  }
 }
 
 export function* fetchNamespaces() {
