@@ -29,7 +29,7 @@ export async function getCustomResource() {
   try {
     // We want to change this hardcoded data later
     return await customObjects.listClusterCustomObject(
-      'example.solution.com',
+      'solution.com',
       'v1alpha1',
       'examples'
     );
@@ -38,11 +38,12 @@ export async function getCustomResource() {
   }
 }
 
-export async function createCustomResource(body) {
+export async function createCustomResource(body, namespaces) {
   try {
-    return await customObjects.createClusterCustomObject(
-      'example.solution.com',
+    return await customObjects.createNamespacedCustomObject(
+      'solution.com',
       'v1alpha1',
+      namespaces,
       'examples',
       body
     );

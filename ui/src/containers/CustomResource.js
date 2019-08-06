@@ -40,21 +40,16 @@ const CustomResource = props => {
       flexGrow: 1
     },
     {
-      label: intl.messages.status,
-      dataKey: 'status'
+      label: intl.messages.namespace,
+      dataKey: 'namespace'
     },
     {
-      label: intl.messages.deployment,
-      dataKey: 'deployment'
-    },
-    {
-      label: intl.messages.roles,
-      dataKey: 'roles',
-      flexGrow: 1
+      label: intl.messages.replicas,
+      dataKey: 'replicas'
     },
     {
       label: intl.messages.version,
-      dataKey: 'metalk8s_version'
+      dataKey: 'version'
     }
   ];
 

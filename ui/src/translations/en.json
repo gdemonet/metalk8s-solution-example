@@ -12,7 +12,7 @@
   "name": "Name",
   "cancel": "Cancel",
   "create": "Create",
-  "namespaces": "Namespaces",
+  "namespace": "Namespace",
   "version": "Version",
   "replicas": "Replicas"
 }
