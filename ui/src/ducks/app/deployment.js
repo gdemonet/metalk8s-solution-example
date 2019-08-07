@@ -47,7 +47,7 @@ export function* refreshDeployements() {
           return {
             name: item.metadata.name,
             namespace: item.metadata.namespace,
-            replicas: item.spec.replicas,
+            image: item.spec.template.spec.containers['0'].image,
             version:
               (item.metadata.labels &&
                 item.metadata.labels[DEPLOYMENT_VERSION_LABEL]) ||
