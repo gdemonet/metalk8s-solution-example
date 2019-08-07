@@ -1,4 +1,4 @@
-import { call, put, takeEvery, select } from 'redux-saga/effects';
+import { call, put, takeEvery } from 'redux-saga/effects';
 
 import * as ApiK8s from '../../services/k8s/api';
 import history from '../../history';
@@ -100,75 +100,6 @@ export function* editCustomResource({ payload }) {
     yield call(refreshCustomResource);
     yield call(history.push, `/customResource`);
   }
-}
-
-export function* createDeployment(namespaces, operator_version) {
-  const registry_prefix = yield select(state => state.config.registry_prefix);
-  const body = {
-    apiVersion: 'apps/v1',
-    kind: 'Deployment',
-    metadata: {
-      name: 'example-operator'
-    },
-    spec: {
-      replicas: 1,
-      selector: {
-        matchLabels: {
-          name: 'example-operator'
-        }
-      },
-      template: {
-        metadata: {
-          labels: {
-            name: 'example-operator'
-          }
-        },
-        spec: {
-          serviceAccountName: 'example-operator',
-          containers: [
-            {
-              name: 'example-operator',
-              image: `${registry_prefix}/example-solution-operator:${operator_version}`,
-              command: ['example-operator'],
-              imagePullPolicy: 'Always',
-              env: [
-                {
-                  name: 'WATCH_NAMESPACE',
-                  valueFrom: {
-                    fieldRef: {
-                      fieldPath: 'metadata.namespace'
-                    }
-                  }
-                },
-                {
-                  name: 'POD_NAME',
-                  valueFrom: {
-                    fieldRef: {
-                      fieldPath: 'metadata.name'
-                    }
-                  }
-                },
-                {
-                  name: 'OPERATOR_NAME',
-                  value: 'example-operator'
-                },
-                {
-                  name: 'REGISTRY_PREFIX',
-                  value: `${registry_prefix}`
-                }
-              ]
-            }
-          ]
-        }
-      }
-    }
-  };
-  const result = yield call(
-    ApiK8s.createNamespacedDeployment,
-    namespaces,
-    body
-  );
-  return result;
 }
 
 export function* customResourceSaga() {

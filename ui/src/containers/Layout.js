@@ -13,6 +13,7 @@ import CustomresourceCreation from './CustomresourceCreation';
 import CustomresourceEdit from './CustomresourceEdit';
 import { fetchCustomResourceAction } from '../ducks/app/customResource';
 import { fetchNamespacesAction } from '../ducks/app/namespaces';
+import { fetchDeployementAction } from '../ducks/app/deployment';
 
 import Welcome from '../components/Welcome';
 import PrivateRoute from './PrivateRoute';
@@ -23,10 +24,12 @@ class Layout extends Component {
   componentDidMount() {
     this.props.fetchNamespaces();
     this.props.fetchCustomResource();
+    this.props.fetchDeployement();
 
     this.interval = setInterval(() => {
       this.props.fetchCustomResource();
-    }, 10000);
+      this.props.fetchDeployement();
+    }, 15000);
   }
 
   componentWillUnmount() {
@@ -135,6 +138,7 @@ const mapDispatchToProps = dispatch => {
     toggleSidebar: () => dispatch(toggleSidebarAction()),
     fetchNamespaces: () => dispatch(fetchNamespacesAction()),
     fetchCustomResource: () => dispatch(fetchCustomResourceAction()),
+    fetchDeployement: () => dispatch(fetchDeployementAction()),
     removeNotification: uid => dispatch(removeNotificationAction(uid))
   };
 };
