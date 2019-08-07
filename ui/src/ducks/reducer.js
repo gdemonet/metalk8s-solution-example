@@ -5,6 +5,7 @@ import login from './login';
 import layout from './app/layout';
 import customResource from './app/customResource';
 import namespaces from './app/namespaces';
+import notifications from './app/notifications';
 
 const rootReducer = combineReducers({
   config,
@@ -12,7 +13,8 @@ const rootReducer = combineReducers({
   app: combineReducers({
     layout,
     customResource,
-    namespaces
+    namespaces,
+    notifications
   })
 });
 

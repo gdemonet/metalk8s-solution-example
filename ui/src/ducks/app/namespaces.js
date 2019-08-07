@@ -3,6 +3,10 @@ import { call, put, takeEvery } from 'redux-saga/effects';
 import * as ApiK8s from '../../services/k8s/api';
 import { createDeployment } from './customResource';
 import history from '../../history';
+import {
+  addNotificationSuccessAction,
+  addNotificationErrorAction
+} from './notifications';
 
 // Actions
 const FETCH_NAMESPACES = 'FETCH_NAMESPACES';
@@ -53,8 +57,34 @@ export function* createNamespaces({ payload }) {
       payload.operator_version
     );
     if (!createDeploymentResult.error) {
+      yield put(
+        addNotificationSuccessAction({
+          title: 'Namespace Provision',
+          message: `Namespace ${
+            payload.name
+          } was successfully provisioned with Operator version ${
+            payload.operator_version
+          }.`
+        })
+      );
       yield call(history.push, `/customResource`);
+    } else {
+      yield put(
+        addNotificationErrorAction({
+          title: 'Namespace Provision',
+          message: `Namespace ${
+            payload.name
+          } failed to provision with Operator version ${
+            payload.operator_version
+          }.`
+        })
+      );
     }
+  } else {
+    addNotificationErrorAction({
+      title: 'Namespace Creation',
+      message: `Namespace ${payload.name} creation failed`
+    });
   }
 }
 
