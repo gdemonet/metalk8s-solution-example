@@ -3,9 +3,10 @@ import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { ThemeProvider } from 'styled-components';
 import { matchPath } from 'react-router';
-import { Layout as CoreUILayout } from '@scality/core-ui';
+import { Layout as CoreUILayout, Notifications } from '@scality/core-ui';
 import { withRouter, Switch } from 'react-router-dom';
 
+import { removeNotificationAction } from '../ducks/app/notifications';
 import CustomResource from './CustomResource';
 import NamespacesCreateForm from './NamespacesCreation';
 import CustomresourceCreation from './CustomresourceCreation';
@@ -87,6 +88,10 @@ class Layout extends Component {
     return (
       <ThemeProvider theme={this.props.theme}>
         <CoreUILayout sidebar={sidebar} navbar={navbar}>
+          <Notifications
+            notifications={this.props.notifications}
+            onDismiss={this.props.removeNotification}
+          />
           <Switch>
             <PrivateRoute exact path="/about" component={Welcome} />
             <PrivateRoute
@@ -120,7 +125,8 @@ class Layout extends Component {
 const mapStateToProps = state => ({
   user: state.login.user,
   sidebar: state.app.layout.sidebar,
-  theme: state.config.theme
+  theme: state.config.theme,
+  notifications: state.app.notifications.list
 });
 
 const mapDispatchToProps = dispatch => {
@@ -128,7 +134,8 @@ const mapDispatchToProps = dispatch => {
     logout: () => dispatch(logoutAction()),
     toggleSidebar: () => dispatch(toggleSidebarAction()),
     fetchNamespaces: () => dispatch(fetchNamespacesAction()),
-    fetchCustomResource: () => dispatch(fetchCustomResourceAction())
+    fetchCustomResource: () => dispatch(fetchCustomResourceAction()),
+    removeNotification: uid => dispatch(removeNotificationAction(uid))
   };
 };
 
