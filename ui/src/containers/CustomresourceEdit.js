@@ -8,7 +8,7 @@ import { injectIntl } from 'react-intl';
 import { Button, Input } from '@scality/core-ui';
 import { padding, gray, fontSize } from '@scality/core-ui/dist/style/theme';
 import { isEmpty } from 'lodash';
-import { createCustomresourceAction } from '../ducks/app/customResource';
+import { editCustomResourceAction } from '../ducks/app/customResource';
 
 const CreateCustomresourceContainter = styled.div`
   height: 100%;
@@ -76,12 +76,19 @@ const validationSchema = Yup.object().shape({
 
 class CustomresourceCreationForm extends React.Component {
   render() {
-    const { intl, namespaces } = this.props;
+    const { intl, namespaces, match, customResources } = this.props;
+    const customResource = customResources.find(
+      cr => cr.name === match.params.id
+    );
     const initialValues = {
-      namespaces: namespaces.length ? namespaces[0].metadata.name : '',
-      version: '',
-      replicas: '',
-      name: ''
+      namespaces: customResource
+        ? customResource.namespace
+        : namespaces.length
+        ? namespaces[0].metadata.name
+        : '',
+      version: customResource ? customResource.version : '',
+      replicas: customResource ? customResource.replicas : '',
+      name: customResource ? customResource.name : ''
     };
 
     return (
@@ -90,14 +97,13 @@ class CustomresourceCreationForm extends React.Component {
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
-            onSubmit={this.props.createCustomresource}
+            onSubmit={this.props.editCustomResource}
           >
             {props => {
               const {
                 values,
                 touched,
                 errors,
-                dirty,
                 setFieldTouched,
                 setFieldValue
               } = props;
@@ -179,7 +185,7 @@ class CustomresourceCreationForm extends React.Component {
                           <Button
                             text={intl.messages.create}
                             type="submit"
-                            disabled={!dirty || !isEmpty(errors)}
+                            disabled={!isEmpty(errors)}
                           />
                         </div>
                       </div>
@@ -197,13 +203,14 @@ class CustomresourceCreationForm extends React.Component {
 
 function mapStateToProps(state) {
   return {
-    namespaces: state.app.namespaces.list
+    namespaces: state.app.namespaces.list,
+    customResources: state.app.customResource.list
   };
 }
 
 const mapDispatchToProps = dispatch => {
   return {
-    createCustomresource: body => dispatch(createCustomresourceAction(body))
+    editCustomResource: body => dispatch(editCustomResourceAction(body))
   };
 };
 
