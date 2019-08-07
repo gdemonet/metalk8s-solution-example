@@ -7,6 +7,7 @@
     "@kubernetes/client-node": "github:scality/kubernetes-client-javascript.git#feature/browser-dist-fix-patch-operations",
     "@scality/core-ui": "github:scality/core-ui.git",
     "axios": "^0.18.0",
+    "classnames": "2.2.6",
     "formik": "1.5.1",
     "lodash": "4.17.11",
     "memoize-one": "^4.0.2",
