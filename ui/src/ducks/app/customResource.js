@@ -8,6 +8,7 @@ const FETCH_CUSTOM_RESOURCE = 'FETCH_CUSTOM_RESOURCE';
 const CREATE_CUSTOM_RESOURCE = 'CREATE_CUSTOM_RESOURCE';
 
 const UPDATE_CUSTOM_RESOURCE = 'UPDATE_CUSTOM_RESOURCE';
+const EDIT_CUSTOM_RESOURCE = 'EDIT_CUSTOM_RESOURCE';
 
 // Reducer
 const defaultState = {
@@ -30,6 +31,10 @@ export const fetchCustomResourceAction = () => {
 
 export const updateCustomResourceAction = payload => {
   return { type: UPDATE_CUSTOM_RESOURCE, payload };
+};
+
+export const editCustomResourceAction = payload => {
+  return { type: EDIT_CUSTOM_RESOURCE, payload };
 };
 
 export const createCustomresourceAction = payload => {
@@ -72,7 +77,32 @@ export function* createCustomResource({ payload }) {
     yield call(history.push, `/customResource`);
   }
 }
+export function* editCustomResource({ payload }) {
+  const { name, namespaces, ...rest } = payload;
+  const body = {
+    apiVersion: 'solution.com/v1alpha1',
+    kind: 'Example',
+    metadata: {
+      name: name
+    },
+    spec: {
+      ...rest
+    }
+  };
+  const result = yield call(
+    ApiK8s.updateCustomResource,
+    body,
+    namespaces,
+    name
+  );
+  if (!result.error) {
+    yield call(refreshCustomResource);
+    yield call(history.push, `/customResource`);
+  }
+}
+
 export function* customResourceSaga() {
   yield takeEvery(FETCH_CUSTOM_RESOURCE, refreshCustomResource);
   yield takeEvery(CREATE_CUSTOM_RESOURCE, createCustomResource);
+  yield takeEvery(EDIT_CUSTOM_RESOURCE, editCustomResource);
 }

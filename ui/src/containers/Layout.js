@@ -9,6 +9,7 @@ import { withRouter, Switch } from 'react-router-dom';
 import CustomResource from './CustomResource';
 import NamespacesCreateForm from './NamespacesCreation';
 import CustomresourceCreation from './CustomresourceCreation';
+import CustomresourceEdit from './CustomresourceEdit';
 import { fetchCustomResourceAction } from '../ducks/app/customResource';
 import { fetchNamespacesAction } from '../ducks/app/namespaces';
 
@@ -92,6 +93,11 @@ class Layout extends Component {
               exact
               path="/customResource"
               component={CustomResource}
+            />
+            <PrivateRoute
+              exact
+              path="/customResource/:id/edit"
+              component={CustomresourceEdit}
             />
             <PrivateRoute
               exact

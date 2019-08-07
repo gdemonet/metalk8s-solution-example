@@ -1,5 +1,5 @@
 import ApiClient from '../ApiClient';
-import { Config, Core_v1Api, Custom_objectsApi } from '@kubernetes/client-node';
+import { Config, CoreV1Api, CustomObjectsApi } from '@kubernetes/client-node';
 
 let config;
 let coreV1;
@@ -21,8 +21,8 @@ export function authenticate(token) {
 
 export const updateApiServerConfig = (url, token) => {
   config = new Config(url, token, 'Basic');
-  coreV1 = config.makeApiClient(Core_v1Api);
-  customObjects = config.makeApiClient(Custom_objectsApi);
+  coreV1 = config.makeApiClient(CoreV1Api);
+  customObjects = config.makeApiClient(CustomObjectsApi);
 };
 
 export async function getCustomResource() {
@@ -46,6 +46,26 @@ export async function createCustomResource(body, namespaces) {
       namespaces,
       'examples',
       body
+    );
+  } catch (error) {
+    return { error };
+  }
+}
+
+export async function updateCustomResource(body, namespaces, name) {
+  try {
+    return await customObjects.patchNamespacedCustomObject(
+      'solution.com',
+      'v1alpha1',
+      namespaces,
+      'examples',
+      name,
+      body,
+      {
+        headers: {
+          'Content-Type': 'application/merge-patch+json'
+        }
+      }
     );
   } catch (error) {
     return { error };
