@@ -70,6 +70,29 @@ const CustomResource = props => {
     }
   ];
 
+  const columnsDeployement = [
+    {
+      label: intl.messages.name,
+      dataKey: 'name',
+      flexGrow: 1
+    },
+    {
+      label: intl.messages.namespace,
+      dataKey: 'namespace',
+      width: 150
+    },
+    {
+      label: 'image',
+      dataKey: 'image',
+      flexGrow: 1
+    },
+    {
+      label: intl.messages.version,
+      dataKey: 'version',
+      width: 100
+    }
+  ];
+
   const onSort = ({ sortBy, sortDirection }) => {
     setSortBy(sortBy);
     setSortDirection(sortDirection);
@@ -125,7 +148,7 @@ const CustomResource = props => {
           <TableTitle>Deployments</TableTitle>
           <Table
             list={deployementSortedList}
-            columns={columns}
+            columns={columnsDeployement}
             disableHeader={false}
             headerHeight={40}
             rowHeight={40}
