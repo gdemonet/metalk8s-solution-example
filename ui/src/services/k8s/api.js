@@ -1,10 +1,16 @@
 import ApiClient from '../ApiClient';
-import { Config, CoreV1Api, CustomObjectsApi } from '@kubernetes/client-node';
+import {
+  Config,
+  CoreV1Api,
+  CustomObjectsApi,
+  AppsV1Api
+} from '@kubernetes/client-node';
 
 let config;
 let coreV1;
 let customObjects;
 let k8sApiClient = null;
+let appsV1Api;
 
 export function initialize(apiUrl) {
   k8sApiClient = new ApiClient({ apiUrl });
@@ -23,6 +29,7 @@ export const updateApiServerConfig = (url, token) => {
   config = new Config(url, token, 'Basic');
   coreV1 = config.makeApiClient(CoreV1Api);
   customObjects = config.makeApiClient(CustomObjectsApi);
+  appsV1Api = config.makeApiClient(AppsV1Api);
 };
 
 export async function getCustomResource() {
@@ -83,6 +90,22 @@ export async function createNamespace(body) {
 export async function getNamespaces() {
   try {
     return await coreV1.listNamespace();
+  } catch (error) {
+    return { error };
+  }
+}
+
+export async function getNamespacedDeployment(namespaces) {
+  try {
+    return await appsV1Api.listNamespacedDeployment(namespaces);
+  } catch (error) {
+    return { error };
+  }
+}
+
+export async function createNamespacedDeployment(namespaces, body) {
+  try {
+    return await appsV1Api.createNamespacedDeployment(namespaces, body);
   } catch (error) {
     return { error };
   }
