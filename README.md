@@ -24,6 +24,9 @@ including:
 - `make operator` and `make ui`, to generate/copy the various Kubernetes
   manifests used to deploy the Operator and the UI, respectively
 
+**Note**: if within `$GOPATH/src`, you need to enable Go modules:
+`GO111MODULE=on make [<target> ...]`.
+
 [Docker]:       https://www.docker.com/
 [GNU Make]:     https://www.gnu.org/software/make/
 [Go]:           https://golang.org/
