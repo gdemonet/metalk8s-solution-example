@@ -1,6 +1,8 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
 
 import * as ApiK8s from '../../services/k8s/api';
+import { createDeployment } from './customResource';
+import history from '../../history';
 
 // Actions
 const FETCH_NAMESPACES = 'FETCH_NAMESPACES';
@@ -45,6 +47,14 @@ export function* createNamespaces({ payload }) {
   const result = yield call(ApiK8s.createNamespace, body);
   if (!result.error) {
     yield call(fetchNamespaces);
+    const createDeploymentResult = yield call(
+      createDeployment,
+      payload.name,
+      payload.operator_version
+    );
+    if (!createDeploymentResult.error) {
+      yield call(history.push, `/customResource`);
+    }
   }
 }
 
