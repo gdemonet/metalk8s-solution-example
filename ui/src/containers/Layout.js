@@ -11,6 +11,7 @@ import CustomResource from './CustomResource';
 import NamespacesCreateForm from './NamespacesCreation';
 import CustomresourceCreation from './CustomresourceCreation';
 import CustomresourceEdit from './CustomresourceEdit';
+import DeployementEdit from './DeployementEdit';
 import { fetchCustomResourceAction } from '../ducks/app/customResource';
 import { fetchNamespacesAction } from '../ducks/app/namespaces';
 import { fetchDeployementAction } from '../ducks/app/deployment';
@@ -106,6 +107,11 @@ class Layout extends Component {
               exact
               path="/customResource/:id/edit"
               component={CustomresourceEdit}
+            />
+            <PrivateRoute
+              exact
+              path="/deployment/:id/edit"
+              component={DeployementEdit}
             />
             <PrivateRoute
               exact

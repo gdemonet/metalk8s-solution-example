@@ -16,6 +16,7 @@
   "name": "Name",
   "cancel": "Cancel",
   "create": "Create",
+  "edit": "Edit",
   "namespace": "Namespace",
   "version": "Version",
   "replicas": "Replicas"
