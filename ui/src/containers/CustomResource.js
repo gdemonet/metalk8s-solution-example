@@ -27,12 +27,27 @@ const ActionContainer = styled.div`
 
 const TableContainer = styled.div`
   flex-grow: 1;
+  display: flex;
+`;
+
+const TableWrapper = styled.div`
+  width: 50%;
+  flex-grow: 1;
+  margin: 10px 30px;
+  height: 500px;
+`;
+
+const TableTitle = styled.label`
+  font-weight: bold;
+  font-size: 16px;
+  margin: 5px 0;
+  display: block;
 `;
 
 const CustomResource = props => {
   const [sortBy, setSortBy] = useState('name');
   const [sortDirection, setSortDirection] = useState('ASC');
-  const { intl, history, customResource } = props;
+  const { intl, history, customResource, deployement } = props;
   const columns = [
     {
       label: intl.messages.name,
@@ -45,11 +60,36 @@ const CustomResource = props => {
     },
     {
       label: intl.messages.replicas,
-      dataKey: 'replicas'
+      dataKey: 'replicas',
+      width: 100
     },
     {
       label: intl.messages.version,
-      dataKey: 'version'
+      dataKey: 'version',
+      flexGrow: 1
+    }
+  ];
+
+  const columnsDeployement = [
+    {
+      label: intl.messages.name,
+      dataKey: 'name',
+      flexGrow: 1
+    },
+    {
+      label: intl.messages.namespace,
+      dataKey: 'namespace',
+      width: 150
+    },
+    {
+      label: 'image',
+      dataKey: 'image',
+      flexGrow: 1
+    },
+    {
+      label: intl.messages.version,
+      dataKey: 'version',
+      width: 100
     }
   ];
 
@@ -63,6 +103,13 @@ const CustomResource = props => {
     sortBy,
     sortDirection
   );
+
+  const deployementSortedList = sortSelector(
+    deployement.list,
+    sortBy,
+    sortDirection
+  );
+
   return (
     <PageContainer>
       <ActionContainer>
@@ -78,22 +125,44 @@ const CustomResource = props => {
         />
       </ActionContainer>
       <TableContainer>
-        <Table
-          list={customResourceSortedList}
-          columns={columns}
-          disableHeader={false}
-          headerHeight={40}
-          rowHeight={40}
-          sortBy={sortBy}
-          sortDirection={sortDirection}
-          onSort={onSort}
-          onRowClick={row => {
-            history.push(`/customResource/${row.rowData.name}/edit`);
-          }}
-          noRowsRenderer={() => (
-            <NoRowsRenderer content={intl.messages.no_data_available} />
-          )}
-        />
+        <TableWrapper>
+          <TableTitle>Custom Resources </TableTitle>
+          <Table
+            list={customResourceSortedList}
+            columns={columns}
+            disableHeader={false}
+            headerHeight={40}
+            rowHeight={40}
+            sortBy={sortBy}
+            sortDirection={sortDirection}
+            onSort={onSort}
+            onRowClick={row => {
+              history.push(`/customResource/${row.rowData.name}/edit`);
+            }}
+            noRowsRenderer={() => (
+              <NoRowsRenderer content={intl.messages.no_data_available} />
+            )}
+          />
+        </TableWrapper>
+        <TableWrapper>
+          <TableTitle>Deployments</TableTitle>
+          <Table
+            list={deployementSortedList}
+            columns={columnsDeployement}
+            disableHeader={false}
+            headerHeight={40}
+            rowHeight={40}
+            sortBy={sortBy}
+            sortDirection={sortDirection}
+            onSort={onSort}
+            onRowClick={row => {
+              history.push(`/customResource/${row.rowData.name}/edit`);
+            }}
+            noRowsRenderer={() => (
+              <NoRowsRenderer content={intl.messages.no_data_available} />
+            )}
+          />
+        </TableWrapper>
       </TableContainer>
     </PageContainer>
   );
@@ -101,7 +170,8 @@ const CustomResource = props => {
 
 function mapStateToProps(state) {
   return {
-    customResource: state.app.customResource
+    customResource: state.app.customResource,
+    deployement: state.app.deployement
   };
 }
 

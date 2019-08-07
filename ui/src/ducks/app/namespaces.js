@@ -1,7 +1,7 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
 
 import * as ApiK8s from '../../services/k8s/api';
-import { createDeployment } from './customResource';
+import { createDeployment, refreshDeployements } from './deployment';
 import history from '../../history';
 import {
   addNotificationSuccessAction,
@@ -57,6 +57,7 @@ export function* createNamespaces({ payload }) {
       payload.operator_version
     );
     if (!createDeploymentResult.error) {
+      yield call(refreshDeployements);
       yield put(
         addNotificationSuccessAction({
           title: 'Namespace Provision',
