@@ -123,9 +123,7 @@ class CustomresourceCreationForm extends React.Component {
               return (
                 <Form>
                   <FormSection>
-                    <FormSectionTitle>
-                      {intl.messages.create_new_customResource}
-                    </FormSectionTitle>
+                    <FormSectionTitle>Edit a Custom Resource</FormSectionTitle>
                     <Input
                       name="name"
                       label={intl.messages.name}
@@ -183,7 +181,7 @@ class CustomresourceCreationForm extends React.Component {
                             }
                           />
                           <Button
-                            text={intl.messages.create}
+                            text={intl.messages.edit}
                             type="submit"
                             disabled={!isEmpty(errors)}
                           />
