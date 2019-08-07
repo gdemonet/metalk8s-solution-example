@@ -151,6 +151,10 @@ export function* createDeployment(namespaces, operator_version) {
                 {
                   name: 'OPERATOR_NAME',
                   value: 'example-operator'
+                },
+                {
+                  name: 'REGISTRY_PREFIX',
+                  value: `${registry_prefix}`
                 }
               ]
             }
