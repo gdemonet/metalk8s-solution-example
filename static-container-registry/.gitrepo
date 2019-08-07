@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/nicolast/static-container-registry
 	branch = master
-	commit = c757492721147f4eab620b8a389eb25c01035f37
-	parent = 4c9d22d7a6a90aa6356ee9b1069307ac502707d3
+	commit = de9ad9be0a87645bf0850d90c5111b637b3fdbb7
+	parent = d0a00623ed8a0d428f545c2690dab722b7ab1c5e
 	method = merge
 	cmdver = 0.4.0
