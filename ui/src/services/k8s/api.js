@@ -79,26 +79,6 @@ export async function updateCustomResource(body, namespaces, name) {
   }
 }
 
-export async function updateDeployement(body, namespaces, name) {
-  try {
-    return await customObjects.patchNamespacedCustomObject(
-      'solution.com',
-      'v1alpha1',
-      namespaces,
-      'examples',
-      name,
-      body,
-      {
-        headers: {
-          'Content-Type': 'application/merge-patch+json'
-        }
-      }
-    );
-  } catch (error) {
-    return { error };
-  }
-}
-
 export async function createNamespace(body) {
   try {
     return await coreV1.createNamespace(body);
@@ -126,6 +106,25 @@ export async function getDeploymentForAllNamespaces() {
 export async function createNamespacedDeployment(namespaces, body) {
   try {
     return await appsV1Api.createNamespacedDeployment(namespaces, body);
+  } catch (error) {
+    return { error };
+  }
+}
+
+export async function updateDeployement(body, namespaces, name) {
+  try {
+    return await appsV1Api.patchNamespacedDeployment(
+      name,
+      namespaces,
+      body,
+      undefined,
+      undefined,
+      {
+        headers: {
+          'Content-Type': 'application/merge-patch+json'
+        }
+      }
+    );
   } catch (error) {
     return { error };
   }

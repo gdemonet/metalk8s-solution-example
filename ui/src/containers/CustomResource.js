@@ -156,7 +156,11 @@ const CustomResource = props => {
             sortDirection={sortDirection}
             onSort={onSort}
             onRowClick={row => {
-              history.push(`/customResource/${row.rowData.name}/edit`);
+              history.push(
+                `namespaces/${row.rowData.namespace}/deployments/${
+                  row.rowData.name
+                }/edit`
+              );
             }}
             noRowsRenderer={() => (
               <NoRowsRenderer content={intl.messages.no_data_available} />

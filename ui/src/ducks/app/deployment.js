@@ -60,18 +60,59 @@ export function* refreshDeployements() {
 }
 
 export function* editDeployement({ payload }) {
-  const { name, namespaces, ...rest } = payload;
+  const registry_prefix = yield select(state => state.config.registry_prefix);
+  const { version, name, namespace } = payload;
   const body = {
-    apiVersion: 'solution.com/v1alpha1',
-    kind: 'Example',
+    apiVersion: 'apps/v1',
+    kind: 'Deployment',
     metadata: {
-      name: name
+      name: name,
+      labels: {
+        [DEPLOYMENT_VERSION_LABEL]: version
+      }
     },
     spec: {
-      ...rest
+      template: {
+        spec: {
+          containers: [
+            {
+              name: 'example-operator',
+              image: `${registry_prefix}/example-solution-operator:${version}`,
+              command: ['example-operator'],
+              imagePullPolicy: 'Always',
+              env: [
+                {
+                  name: 'WATCH_NAMESPACE',
+                  valueFrom: {
+                    fieldRef: {
+                      fieldPath: 'metadata.namespace'
+                    }
+                  }
+                },
+                {
+                  name: 'POD_NAME',
+                  valueFrom: {
+                    fieldRef: {
+                      fieldPath: 'metadata.name'
+                    }
+                  }
+                },
+                {
+                  name: 'OPERATOR_NAME',
+                  value: 'example-operator'
+                },
+                {
+                  name: 'REGISTRY_PREFIX',
+                  value: `${registry_prefix}`
+                }
+              ]
+            }
+          ]
+        }
+      }
     }
   };
-  const result = yield call(ApiK8s.updateDeployement, body, namespaces, name);
+  const result = yield call(ApiK8s.updateDeployement, body, namespace, name);
   if (!result.error) {
     yield call(refreshDeployements);
     yield call(history.push, `/customResource`);
