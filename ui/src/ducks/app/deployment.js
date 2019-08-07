@@ -39,7 +39,7 @@ export function* createDeployment(namespaces, operator_version) {
           containers: [
             {
               name: 'example-operator',
-              image: `${registry_prefix}/example-solution-operator:${operator_version}`,
+              image: `${registry_prefix}/example-solution-${version}/example-solution-operator:${operator_version}`,
               command: ['example-operator'],
               imagePullPolicy: 'Always',
               env: [
