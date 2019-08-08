@@ -12,9 +12,19 @@ VERSION_FULL = \
 	$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)$(VERSION_SUFFIX)
 
 PWD := $(shell pwd)
+GIT_REVISION := $(shell git describe --long --always --tags --dirty)
+BUILD_TIMESTAMP := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+BUILD_HOST := $(shell hostname)
 
-PRODUCT_NAME ?= ExampleSolution
+ifeq '$(VERSION_SUFFIX)' 'dev'
+DEVELOPMENT_RELEASE = 1
+else
+DEVELOPMENT_RELEASE = 0
+endif
+
+PRODUCT_NAME ?= Example Solution
 PRODUCT_LOWERNAME ?= example-solution
+
 
 # Destination paths
 BUILD_ROOT ?= $(PWD)/_build
@@ -41,6 +51,12 @@ REGISTRY_SCRIPT ?= \
 
 # Container images {{{
 
+BUILD_ARGS ?= \
+	--build-arg VERSION=$(VERSION_FULL) \
+	--build-arg BUILD_DATE=$(BUILD_TIMESTAMP) \
+	--build-arg VCS_REF=$(GIT_REVISION) \
+	--build-arg PROJECT_VERSION=$(VERSION_FULL)
+
 # Images are either defined under `images/<name>/`, or in the UI and Operator
 # sources.
 # UI and Operator images deserve special treatment and are thus handled
@@ -65,10 +81,10 @@ UI_BUILD_TARGET = $(call _built_tgt,$(UI_IMG_NAME))
 build_ui: $(UI_BUILD_TARGET)
 .PHONY: build_ui
 
-$(UI_BUILD_TARGET): $(UI_SRC)/Dockerfile
+$(UI_BUILD_TARGET): $(UI_SRC)/* $(UI_SRC)/**/*
 	@echo Building UI image "$(UI_IMG_NAME):$(VERSION_FULL)"...
 	@mkdir -p $(@D)
-	docker build -t $(UI_IMG_NAME):$(VERSION_FULL) $(<D)
+	docker build -t $(UI_IMG_NAME):$(VERSION_FULL) $(BUILD_ARGS) $(<D)
 	@touch $@
 	@echo Built UI image.
 
@@ -78,8 +94,8 @@ OPERATOR_BUILD_TARGET = $(call _built_tgt,$(OPERATOR_IMG_NAME))
 build_operator: $(OPERATOR_BUILD_TARGET)
 .PHONY: build_operator
 
-# TODO: find a way to define requisites for this task
-$(OPERATOR_BUILD_TARGET):
+# TODO: patch Dockerfile to include common labels
+$(OPERATOR_BUILD_TARGET): $(OPERATOR_SRC)/*
 	@echo Building Operator image "$(OPERATOR_IMG_NAME):$(VERSION_FULL)"...
 	@mkdir -p $(@D)
 	cd $(OPERATOR_SRC) && \
@@ -92,10 +108,10 @@ STD_BUILD_TARGETS = $(foreach img,$(STD_IMAGES),$(call _built_tgt,$(img)))
 build_std_images: $(STD_BUILD_TARGETS)
 .PHONY: build_std_images
 
-$(BUILD_ROOT)/images/%/.built: $(IMAGES_SRC)/%/Dockerfile
+$(BUILD_ROOT)/images/%/.built: $(IMAGES_SRC)/%/*
 	@echo Building component image "$*:$(VERSION_FULL)"
 	@mkdir -p $(@D)
-	$(DOCKER) $(DOCKER_OPTS) build -t $*:$(VERSION_FULL) $(<D)
+	$(DOCKER) $(DOCKER_OPTS) build -t $*:$(VERSION_FULL) $(BUILD_ARGS) $(<D)
 	@touch $@
 	@echo Built all component images.
 
@@ -158,7 +174,10 @@ ui: $(UI_TARGETS)
 $(ISO_ROOT)/ui/%.yaml: $(UI_SRC)/deploy/%.yaml
 	@echo Render $< into $@.
 	@mkdir -p $(@D)
-	@sed -e 's/@VERSION@/$(VERSION_FULL)/' -e 's/@REPOSITORY@/$(TODO)/' $< > $@
+	@sed \
+		-e 's/@VERSION@/$(VERSION_FULL)/' \
+		-e 's/@REPOSITORY@/{{ repository }}/' \
+		$< > $@
 
 # Operator manifests
 OPERATOR_MANIFESTS := $(wildcard \
@@ -186,11 +205,13 @@ $(ISO_ROOT)/product.txt: $(PWD)/product.sh $(PWD)/VERSION FORCE
 	@rm -f $@
 	@mkdir -p $(@D)
 	@env \
-		NAME=$(PRODUCT_NAME) \
-		VERSION_MAJOR=$(VERSION_MAJOR) \
-		VERSION_MINOR=$(VERSION_MINOR) \
-		VERSION_PATCH=$(VERSION_PATCH) \
-		VERSION_SUFFIX=$(VERSION_SUFFIX) \
+		NAME="$(PRODUCT_NAME)" \
+		VERSION=$(VERSION_FULL) \
+		SHORT_VERSION=$(VERSION_MAJOR)-$(VERSION_MINOR) \
+		GIT=$(GIT_REVISION) \
+		DEVELOPMENT_RELEASE=$(DEVELOPMENT_RELEASE) \
+		BUILD_TIMESTAMP=$(BUILD_TIMESTAMP) \
+		BUILD_HOST=$(BUILD_HOST) \
 		$< > $@ || (rm -f $@; false)
 
 

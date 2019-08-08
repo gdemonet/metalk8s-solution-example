@@ -5,6 +5,7 @@ metadata:
   namespace: admin-uis
   labels:
     app: example-solution-ui
+    heritage: example-solution
     app.kubernetes.io/name: example-solution-ui
     app.kubernetes.io/version: "@VERSION@"
     app.kubernetes.io/component: ui
@@ -18,6 +19,8 @@ spec:
   template:
     metadata:
       labels:
+        app: example-solution-ui
+        heritage: example-solution
         app.kubernetes.io/name: example-solution-ui
         app.kubernetes.io/instance: example-solution-ui
         app.kubernetes.io/version: "@VERSION@"
@@ -57,7 +60,7 @@ spec:
               scheme: HTTP
           volumeMounts:
           - name: ui-branding
-            mountPath: /etc/example-solution/ui/brand
+            mountPath: /etc/example-solution/ui
             readOnly: true
       volumes:
         - name: ui-branding
