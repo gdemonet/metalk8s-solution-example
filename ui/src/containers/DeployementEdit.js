@@ -74,7 +74,11 @@ const validationSchema = Yup.object().shape({
 class DeployementCreationForm extends React.Component {
   render() {
     const { intl, match, deployements } = this.props;
-    const deployement = deployements.find(cr => cr.name === match.params.id);
+    const deployement = deployements.find(
+      item =>
+        item.name === match.params.deploymentName &&
+        item.namespace === match.params.id
+    );
     const initialValues = {
       namespace: deployement ? deployement.namespace : '',
       version: deployement ? deployement.version : '',
