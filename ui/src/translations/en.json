@@ -19,5 +19,6 @@
   "edit": "Edit",
   "namespace": "Namespace",
   "version": "Version",
-  "replicas": "Replicas"
+  "replicas": "Replicas",
+  "no_data_available": "No data available"
 }
