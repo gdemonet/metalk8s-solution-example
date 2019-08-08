@@ -61,7 +61,7 @@ export function* refreshCustomResource() {
   }
 }
 export function* createCustomResource({ payload }) {
-  const { name, namespaces, ...rest } = payload;
+  const { name, namespaces, replicas, ...rest } = payload;
   const body = {
     apiVersion: 'solution.com/v1alpha1',
     kind: 'Example',
@@ -69,6 +69,7 @@ export function* createCustomResource({ payload }) {
       name: name
     },
     spec: {
+      replicas: parseInt(replicas, 10),
       ...rest
     }
   };
@@ -79,7 +80,7 @@ export function* createCustomResource({ payload }) {
   }
 }
 export function* editCustomResource({ payload }) {
-  const { name, namespaces, ...rest } = payload;
+  const { name, namespaces, replicas, ...rest } = payload;
   const body = {
     apiVersion: 'solution.com/v1alpha1',
     kind: 'Example',
@@ -87,6 +88,7 @@ export function* editCustomResource({ payload }) {
       name: name
     },
     spec: {
+      replicas: parseInt(replicas, 10),
       ...rest
     }
   };
