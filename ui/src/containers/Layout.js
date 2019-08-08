@@ -110,11 +110,6 @@ class Layout extends Component {
             />
             <PrivateRoute
               exact
-              path="/deployment/:id/edit"
-              component={DeployementEdit}
-            />
-            <PrivateRoute
-              exact
               path="/customResource/create"
               component={CustomresourceCreation}
             />
@@ -122,6 +117,10 @@ class Layout extends Component {
               exact
               path="/namespaces/create"
               component={NamespacesCreateForm}
+            />
+            <PrivateRoute
+              path="/namespaces/:id/deployments/:deploymentName/edit"
+              component={DeployementEdit}
             />
             <PrivateRoute exact path="/" component={CustomResource} />
           </Switch>
