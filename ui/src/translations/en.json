@@ -1,9 +1,5 @@
 {
-<<<<<<< HEAD
-  "product_name": "Scality Template UI",
-=======
   "product_name": "Scality Solution UI",
->>>>>>> intergate UI
   "username": "Username",
   "password": "Password",
   "submit": "Submit",

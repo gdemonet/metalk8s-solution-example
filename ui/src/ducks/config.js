@@ -2,10 +2,7 @@ import { call, put, takeEvery } from 'redux-saga/effects';
 import { mergeTheme } from '@scality/core-ui/dist/utils';
 import * as defaultTheme from '@scality/core-ui/dist/style/theme';
 import * as Api from '../services/api';
-<<<<<<< HEAD
-=======
 import * as ApiK8s from '../services/k8s/api';
->>>>>>> intergate UI
 import { fetchUserInfo } from './login';
 
 // Actions
