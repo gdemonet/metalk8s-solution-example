@@ -68,7 +68,9 @@ export function* refreshDeployements() {
 }
 
 export function* editDeployement({ payload }) {
-  const registry_prefix = yield select(state => state.config.registry_prefix);
+  const registry_prefix = yield select(
+    state => state.config.api.registry_prefix
+  );
   const { version, name, namespace } = payload;
   const body = {
     apiVersion: 'apps/v1',
@@ -85,7 +87,7 @@ export function* editDeployement({ payload }) {
           containers: [
             {
               name: 'example-operator',
-              image: `${registry_prefix}/example-solution-operator:${version}`,
+              image: `${registry_prefix}/example-solution-${version}/example-solution-operator:${version}`,
               command: ['example-operator'],
               imagePullPolicy: 'Always',
               env: [
@@ -128,7 +130,9 @@ export function* editDeployement({ payload }) {
 }
 
 export function* createDeployment(namespaces, operator_version) {
-  const registry_prefix = yield select(state => state.config.registry_prefix);
+  const registry_prefix = yield select(
+    state => state.config.api.registry_prefix
+  );
   const body = {
     apiVersion: 'apps/v1',
     kind: 'Deployment',

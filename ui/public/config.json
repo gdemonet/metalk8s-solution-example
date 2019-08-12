@@ -1,3 +1,5 @@
 {
-    "url": "https://localhost:8080"
-}
+    "url": "https://172.21.254.14:6443",
+    "registry_prefix": "172.21.254.12:8080"
+  }
+  
