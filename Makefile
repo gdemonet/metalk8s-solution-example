@@ -235,8 +235,8 @@ $(ISO): all
 		--iso-level 3 \
 		-gid 0 \
 		-uid 0 \
-		-input-charset utf-8 \
-		-output-charset utf-8 \
+		-input-charset iso8859-1 \
+		-output-charset iso8859-1 \
 		$(ISO_ROOT)
 	cd $$(dirname $@) && sha256sum $(notdir $@) > SHA256SUM
 
