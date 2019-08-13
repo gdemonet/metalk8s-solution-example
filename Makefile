@@ -12,9 +12,19 @@ VERSION_FULL = \
 	$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)$(VERSION_SUFFIX)
 
 PWD := $(shell pwd)
+GIT_REVISION := $(shell git describe --long --always --tags --dirty)
+BUILD_TIMESTAMP := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+BUILD_HOST := $(shell hostname)
 
-PRODUCT_NAME ?= ExampleSolution
+ifeq '$(VERSION_SUFFIX)' 'dev'
+DEVELOPMENT_RELEASE = 1
+else
+DEVELOPMENT_RELEASE = 0
+endif
+
+PRODUCT_NAME ?= Example Solution
 PRODUCT_LOWERNAME ?= example-solution
+
 
 # Destination paths
 BUILD_ROOT ?= $(PWD)/_build
@@ -189,11 +199,13 @@ $(ISO_ROOT)/product.txt: $(PWD)/product.sh $(PWD)/VERSION FORCE
 	@rm -f $@
 	@mkdir -p $(@D)
 	@env \
-		NAME=$(PRODUCT_NAME) \
-		VERSION_MAJOR=$(VERSION_MAJOR) \
-		VERSION_MINOR=$(VERSION_MINOR) \
-		VERSION_PATCH=$(VERSION_PATCH) \
-		VERSION_SUFFIX=$(VERSION_SUFFIX) \
+		NAME="$(PRODUCT_NAME)" \
+		VERSION=$(VERSION_FULL) \
+		SHORT_VERSION=$(VERSION_MAJOR)-$(VERSION_MINOR) \
+		GIT=$(GIT_REVISION) \
+		DEVELOPMENT_RELEASE=$(DEVELOPMENT_RELEASE) \
+		BUILD_TIMESTAMP=$(BUILD_TIMESTAMP) \
+		BUILD_HOST=$(BUILD_HOST) \
 		$< > $@ || (rm -f $@; false)
 
 
