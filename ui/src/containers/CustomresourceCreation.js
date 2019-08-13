@@ -6,8 +6,10 @@ import * as Yup from 'yup';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import { Button, Input } from '@scality/core-ui';
-import { padding, gray, fontSize } from '@scality/core-ui/dist/style/theme';
+import { padding, gray } from '@scality/core-ui/dist/style/theme';
 import { isEmpty } from 'lodash';
+import semver from 'semver';
+
 import { createCustomresourceAction } from '../ducks/app/customResource';
 
 const CreateCustomresourceContainter = styled.div`
@@ -24,28 +26,14 @@ const CreateCustomresourceLayout = styled.div`
   form {
     .sc-input {
       margin: ${padding.smaller} 0;
-      .sc-input-label {
+      .sc-input-label,
+      .sc-input-type,
+      .sc-select {
         width: 200px;
+        box-sizing: border-box;
       }
     }
   }
-`;
-
-const SelectLabel = styled.label`
-  width: 200px;
-  padding: 10px;
-  font-size: ${fontSize.base};
-`;
-
-const SelectFieldContainer = styled.div`
-  display: inline-flex;
-  align-items: center;
-`;
-
-const SelectField = styled.select`
-  width: 200px;
-  height: 35px;
-  font-size: 14px;
 `;
 
 const ActionContainer = styled.div`
@@ -69,133 +57,135 @@ const FormSection = styled.div`
   flex-direction: column;
 `;
 
-const validationSchema = Yup.object().shape({
-  namespaces: Yup.string().required(),
-  version: Yup.string().required(),
-  replicas: Yup.number().required(),
-  name: Yup.string().required()
-});
+const CustomresourceCreationForm = props => {
+  const { intl, namespaces } = props;
+  const initialValues = {
+    namespaces: namespaces.length ? namespaces[0].metadata.name : '',
+    version: '',
+    replicas: '',
+    name: ''
+  };
 
-class CustomresourceCreationForm extends React.Component {
-  render() {
-    const { intl, namespaces } = this.props;
-    const initialValues = {
-      namespaces: namespaces.length ? namespaces[0].metadata.name : '',
-      version: '',
-      replicas: '',
-      name: ''
-    };
+  const validationSchema = Yup.object().shape({
+    namespaces: Yup.string().required(),
+    version: Yup.string()
+      .required()
+      .test('is-version-valid', intl.messages.not_valid_version, value =>
+        semver.valid(value)
+      ),
+    replicas: Yup.number().required(),
+    name: Yup.string().required()
+  });
 
-    return (
-      <CreateCustomresourceContainter>
-        <CreateCustomresourceLayout>
-          <Formik
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={this.props.createCustomresource}
-          >
-            {props => {
-              const {
-                values,
-                touched,
-                errors,
-                dirty,
-                setFieldTouched,
-                setFieldValue
-              } = props;
+  return (
+    <CreateCustomresourceContainter>
+      <CreateCustomresourceLayout>
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={props.createCustomresource}
+        >
+          {formProps => {
+            const {
+              values,
+              touched,
+              errors,
+              dirty,
+              setFieldTouched,
+              setFieldValue
+            } = formProps;
 
-              //handleChange of the Formik props does not update 'values' when field value is empty
-              const handleChange = field => e => {
-                const { value, checked, type } = e.target;
-                setFieldValue(
-                  field,
-                  type === 'checkbox' ? checked : value,
-                  true
-                );
+            //handleChange of the Formik props does not update 'values' when field value is empty
+            const handleChange = field => e => {
+              const { value, checked, type } = e.target;
+              setFieldValue(field, type === 'checkbox' ? checked : value, true);
+            };
+
+            //touched is not "always" correctly set
+            const handleOnBlur = e => setFieldTouched(e.target.name, true);
+            const handleSelectChange = field => selectedObj => {
+              setFieldValue(field, selectedObj.value);
+            };
+
+            const options = namespaces.map(namespace => {
+              return {
+                label: namespace.metadata.name,
+                value: namespace.metadata.name
               };
-              //touched is not "always" correctly set
-              const handleOnBlur = e => setFieldTouched(e.target.name, true);
+            });
 
-              return (
-                <Form>
-                  <FormSection>
-                    <FormSectionTitle>
-                      {intl.messages.create_new_customResource}
-                    </FormSectionTitle>
-                    <Input
-                      name="name"
-                      label={intl.messages.name}
-                      value={values.name}
-                      onChange={handleChange('name')}
-                      error={touched.name && errors.name}
-                      onBlur={handleOnBlur}
-                    />
-                    <SelectFieldContainer>
-                      <SelectLabel>{intl.messages.namespace}</SelectLabel>
-                      <SelectField
-                        name="namespaces"
-                        onChange={handleChange('namespaces')}
-                        value={values.namespaces}
-                        error={touched.namespaces && errors.namespaces}
-                        onBlur={handleOnBlur}
-                      >
-                        {namespaces.map((namespace, idx) => (
-                          <option
-                            key={`namespace_${idx}`}
-                            value={namespace.metadata.name}
-                          >
-                            {namespace.metadata.name}
-                          </option>
-                        ))}
-                      </SelectField>
-                    </SelectFieldContainer>
-                    <Input
-                      name="version"
-                      label={intl.messages.version}
-                      value={values.version}
-                      onChange={handleChange('version')}
-                      error={touched.version && errors.version}
-                      onBlur={handleOnBlur}
-                    />
+            return (
+              <Form>
+                <FormSection>
+                  <FormSectionTitle>
+                    {intl.messages.create_new_customResource}
+                  </FormSectionTitle>
+                  <Input
+                    name="name"
+                    label={intl.messages.name}
+                    value={values.name}
+                    onChange={handleChange('name')}
+                    error={touched.name && errors.name}
+                    onBlur={handleOnBlur}
+                  />
+                  <Input
+                    id="namespaces_input_creation"
+                    label={intl.messages.namespace}
+                    clearable={false}
+                    type="select"
+                    options={options}
+                    placeholder={intl.messages.select_a_namespace}
+                    noResultsText={intl.messages.not_found}
+                    name="namespaces"
+                    onChange={handleSelectChange('namespaces')}
+                    value={values.namespaces}
+                    error={touched.namespaces && errors.namespaces}
+                    onBlur={handleOnBlur}
+                  />
+                  <Input
+                    name="version"
+                    label={intl.messages.version}
+                    value={values.version}
+                    onChange={handleChange('version')}
+                    error={touched.version && errors.version}
+                    onBlur={handleOnBlur}
+                  />
 
-                    <Input
-                      name="replicas"
-                      label={intl.messages.replicas}
-                      value={values.replicas}
-                      onChange={handleChange('replicas')}
-                      error={touched.replicas && errors.replicas}
-                      onBlur={handleOnBlur}
-                    />
+                  <Input
+                    name="replicas"
+                    label={intl.messages.replicas}
+                    value={values.replicas}
+                    onChange={handleChange('replicas')}
+                    error={touched.replicas && errors.replicas}
+                    onBlur={handleOnBlur}
+                  />
 
-                    <ActionContainer>
+                  <ActionContainer>
+                    <div>
                       <div>
-                        <div>
-                          <Button
-                            text={intl.messages.cancel}
-                            type="button"
-                            outlined
-                            onClick={() =>
-                              this.props.history.push('/customResource')
-                            }
-                          />
-                          <Button
-                            text={intl.messages.create}
-                            type="submit"
-                            disabled={!dirty || !isEmpty(errors)}
-                          />
-                        </div>
+                        <Button
+                          text={intl.messages.cancel}
+                          type="button"
+                          outlined
+                          onClick={() => props.history.push('/customResource')}
+                        />
+                        <Button
+                          text={intl.messages.create}
+                          type="submit"
+                          disabled={!dirty || !isEmpty(errors)}
+                        />
                       </div>
-                    </ActionContainer>
-                  </FormSection>
-                </Form>
-              );
-            }}
-          </Formik>
-        </CreateCustomresourceLayout>
-      </CreateCustomresourceContainter>
-    );
-  }
-}
+                    </div>
+                  </ActionContainer>
+                </FormSection>
+              </Form>
+            );
+          }}
+        </Formik>
+      </CreateCustomresourceLayout>
+    </CreateCustomresourceContainter>
+  );
+};
 
 function mapStateToProps(state) {
   return {

@@ -6,6 +6,8 @@ import {
   AppsV1Api
 } from '@kubernetes/client-node';
 
+import { PART_OF_SOLUTION_LABEL } from '../../ducks/app/deployment';
+
 let config;
 let coreV1;
 let customObjects;
@@ -79,25 +81,28 @@ export async function updateCustomResource(body, namespaces, name) {
   }
 }
 
-export async function createNamespace(body) {
+export async function getSolutionNamespaces() {
   try {
-    return await coreV1.createNamespace(body);
+    return await coreV1.listNamespace(
+      null,
+      null,
+      null,
+      null,
+      `${PART_OF_SOLUTION_LABEL}=example-solution`
+    );
   } catch (error) {
     return { error };
   }
 }
 
-export async function getNamespaces() {
+export async function getSolutionDeployment(version) {
   try {
-    return await coreV1.listNamespace();
-  } catch (error) {
-    return { error };
-  }
-}
-
-export async function getDeploymentForAllNamespaces() {
-  try {
-    return await appsV1Api.listDeploymentForAllNamespaces();
+    return await appsV1Api.listDeploymentForAllNamespaces(
+      null,
+      null,
+      null,
+      `${PART_OF_SOLUTION_LABEL}=example-solution`
+    );
   } catch (error) {
     return { error };
   }
@@ -111,7 +116,7 @@ export async function createNamespacedDeployment(namespaces, body) {
   }
 }
 
-export async function updateDeployement(body, namespaces, name) {
+export async function updateDeployment(body, namespaces, name) {
   try {
     return await appsV1Api.patchNamespacedDeployment(
       name,

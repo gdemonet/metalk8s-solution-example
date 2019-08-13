@@ -3,13 +3,13 @@ import { call, put, takeEvery, select } from 'redux-saga/effects';
 import * as ApiK8s from '../../services/k8s/api';
 import history from '../../history';
 
-// Actions
-const FETCH_DEPLOYMENT = 'FETCH_DEPLOYMENT';
+const CREATE_DEPLOYMENT = 'CREATE_DEPLOYMENT';
 const UPDATE_DEPLOYMENT = 'UPDATE_DEPLOYMENT';
 const EDIT_DEPLOYMENT = 'EDIT_DEPLOYMENT';
-const DEPLOYMENT_VERSION_LABEL = 'metalk8s.scality.com/solution-version';
+
+export const DEPLOYMENT_VERSION_LABEL = 'metalk8s.scality.com/solution-version';
 const DEPLOYMENT_NAME_LABEL = 'metalk8s.scality.com/solution-name';
-const PART_OF_SOLUTION_LABEL = 'app.kubernetes.io/part-of';
+export const PART_OF_SOLUTION_LABEL = 'app.kubernetes.io/part-of';
 
 // Reducer
 const defaultState = {
@@ -26,52 +26,46 @@ export default function reducer(state = defaultState, action = {}) {
 }
 
 // Action Creators
-export const fetchDeployementAction = () => {
-  return { type: FETCH_DEPLOYMENT };
+
+export const createDeploymentAction = () => {
+  return { type: CREATE_DEPLOYMENT };
 };
 
-export const updateDeployementAction = payload => {
+export const updateDeploymentAction = payload => {
   return { type: UPDATE_DEPLOYMENT, payload };
 };
 
-export const editDeployementAction = payload => {
+export const editDeploymentAction = payload => {
   return { type: EDIT_DEPLOYMENT, payload };
 };
 
 // Sagas
-export function* refreshDeployements() {
-  const results = yield call(ApiK8s.getDeploymentForAllNamespaces);
+export function* fetchSolutionDeployments() {
+  const results = yield call(ApiK8s.getSolutionDeployment);
   if (!results.error) {
     yield put(
-      updateDeployementAction({
-        list: results.body.items
-          .filter(
-            item =>
-              item.metadata.labels &&
-              item.metadata.labels[PART_OF_SOLUTION_LABEL] ===
-                'example-solution'
-          )
-          .map(item => {
-            return {
-              name: item.metadata.name,
-              namespace: item.metadata.namespace,
-              image: item.spec.template.spec.containers['0'].image,
-              version:
-                (item.metadata.labels &&
-                  item.metadata.labels[DEPLOYMENT_VERSION_LABEL]) ||
-                ''
-            };
-          })
+      updateDeploymentAction({
+        list: results.body.items.map(item => {
+          return {
+            name: item.metadata.name,
+            namespace: item.metadata.namespace,
+            image: item.spec.template.spec.containers['0'].image,
+            version:
+              (item.metadata.labels &&
+                item.metadata.labels[DEPLOYMENT_VERSION_LABEL]) ||
+              ''
+          };
+        })
       })
     );
   }
+  return results;
 }
 
-export function* editDeployement({ payload }) {
+export function* editDeployment(version, name, namespace) {
   const registry_prefix = yield select(
     state => state.config.api.registry_prefix
   );
-  const { version, name, namespace } = payload;
   const body = {
     apiVersion: 'apps/v1',
     kind: 'Deployment',
@@ -122,11 +116,11 @@ export function* editDeployement({ payload }) {
       }
     }
   };
-  const result = yield call(ApiK8s.updateDeployement, body, namespace, name);
+  const result = yield call(ApiK8s.updateDeployment, body, namespace, name);
   if (!result.error) {
-    yield call(refreshDeployements);
     yield call(history.push, `/customResource`);
   }
+  return result;
 }
 
 export function* createDeployment(namespaces, operator_version) {
@@ -206,6 +200,6 @@ export function* createDeployment(namespaces, operator_version) {
 }
 
 export function* deploymentSaga() {
-  yield takeEvery(FETCH_DEPLOYMENT, refreshDeployements);
-  yield takeEvery(EDIT_DEPLOYMENT, editDeployement);
+  yield takeEvery(CREATE_DEPLOYMENT, createDeployment);
+  yield takeEvery(EDIT_DEPLOYMENT, editDeployment);
 }

@@ -8,7 +8,7 @@ import {
   SET_USER_INFO_LOADED,
   fetchUserInfo
 } from './login';
-import * as Api from '../services/api';
+import * as Api from '../services/k8s/api';
 
 it('authentication failed', () => {
   const payload = { username: 'admin', password: 'admin' };
@@ -16,9 +16,7 @@ it('authentication failed', () => {
   const token = btoa('admin:admin');
 
   expect(gen.next().value.type).toEqual('SELECT');
-  expect(gen.next('localhost:8080').value).toEqual(
-    call(Api.authenticate, token, 'localhost:8080')
-  );
+  expect(gen.next().value).toEqual(call(Api.authenticate, token));
 
   const result = {
     error: {
@@ -47,9 +45,8 @@ it('authentication success', () => {
   const token = btoa('admin:admin');
 
   expect(gen.next().value.type).toEqual('SELECT');
-  expect(gen.next('localhost:8080').value).toEqual(
-    call(Api.authenticate, token, 'localhost:8080')
-  );
+  const selectResult = { url: 'localhost:8080' };
+  expect(gen.next(selectResult).value).toEqual(call(Api.authenticate, token));
 
   const result = {
     data: {}
@@ -63,6 +60,10 @@ it('authentication success', () => {
         token
       }
     })
+  );
+
+  expect(gen.next(selectResult).value).toEqual(
+    call(Api.updateApiServerConfig, 'localhost:8080', token)
   );
 
   expect(gen.next().value).toEqual(call(history.push, '/'));
@@ -93,6 +94,10 @@ it('fetchUserInfo success', () => {
     })
   );
 
+  expect(gen.next().value.type).toEqual('SELECT');
+  expect(gen.next({ url: 'localhost:8080' }).value).toEqual(
+    call(Api.updateApiServerConfig, 'localhost:8080', 'dGVzdDp0ZXN0')
+  );
   expect(gen.next(result).value).toEqual(
     put({
       type: SET_USER_INFO_LOADED,
