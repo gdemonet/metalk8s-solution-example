@@ -173,7 +173,7 @@ func (r *ReconcileExample) deploymentForExample(example *solutionv1alpha1.Exampl
 					Containers: []corev1.Container{{
 						Image:   fmt.Sprintf("example-component:%s", example.Spec.Version),
 						Name:    "example-component",
-						Command: []string{"/bin/main", "--listen-address", ":8080"},
+						Command: []string{"python3", "/app/server.py"},
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: 8080,
 							Name:          "example",

@@ -3,39 +3,13 @@
 ARG EXAMPLE_IMAGE_SHA256=6ae4cddb2b37f889afd576a17a5286b311dcbf10a904409670827f6f9b50065e
 ARG EXAMPLE_IMAGE=docker.io/centos
 
+FROM ${EXAMPLE_IMAGE}@sha256:${EXAMPLE_IMAGE_SHA256}
 
-## Build container
-FROM ${EXAMPLE_IMAGE}@sha256:${EXAMPLE_IMAGE_SHA256} as build
-
-RUN yum -y update && yum clean all
+RUN yum install -y epel-release && yum update -y && yum clean all
 
 RUN yum install -y \
-        wget \
-        git
+        python36
 
-ARG GO_VERSION=1.12.7
-
-RUN wget https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz && \
-    tar -C / -xzf go${GO_VERSION}.linux-amd64.tar.gz
-
-ENV GOROOT=/go \
-    GOPATH=/app
-
-ENV PATH="${PATH}:${GOROOT}/bin"
-
-RUN mkdir -p /app/src/prometheus && \
-    git clone https://github.com/prometheus/client_golang.git \
-        /app/src/prometheus/client_golang
-
-WORKDIR /app/src/prometheus/client_golang/examples/random
-
-ENV GO111MODULE=on
-RUN GOPROXY=https://proxy.golang.org go get -d -v && \
-    go build -v -o /bin/main
-
-
-## Main container
-FROM ${EXAMPLE_IMAGE}@sha256:${EXAMPLE_IMAGE_SHA256}
 
 # Timestamp of the build, formatted as RFC3339
 ARG BUILD_DATE
@@ -43,8 +17,12 @@ ARG BUILD_DATE
 ARG VCS_REF
 # Version of the image
 ARG VERSION
-# Version of the project, e.g. `git describe --always --long --dirty --broken`
+# Version of the project
 ARG PROJECT_VERSION
+
+WORKDIR /app
+COPY __version__.py /app/
+RUN sed -i 's/@VERSION@/$VERSION/' __version__.py
 
 # These contain BUILD_DATE so should come 'late' for layer caching
 LABEL maintainer="example@solution.com" \
@@ -75,6 +53,6 @@ LABEL maintainer="example@solution.com" \
       # Various
       com.solution.example.version="$PROJECT_VERSION"
 
-COPY --from=build /bin/main /bin/main
-ENTRYPOINT [ "/bin/main" ]
-CMD [ "-listen-address", ":8080" ]
+COPY server.py /app/
+
+ENTRYPOINT [ "python3", "/app/server.py" ]
