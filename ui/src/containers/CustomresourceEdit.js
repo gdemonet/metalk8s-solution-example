@@ -8,6 +8,7 @@ import { injectIntl } from 'react-intl';
 import { Button, Input } from '@scality/core-ui';
 import { padding, gray, fontSize } from '@scality/core-ui/dist/style/theme';
 import { isEmpty } from 'lodash';
+import semver from 'semver';
 import { editCustomResourceAction } from '../ducks/app/customResource';
 
 const CreateCustomresourceContainter = styled.div`
@@ -24,28 +25,26 @@ const CreateCustomresourceLayout = styled.div`
   form {
     .sc-input {
       margin: ${padding.smaller} 0;
-      .sc-input-label {
+      .sc-input-label,
+      .sc-input-type,
+      .sc-select {
         width: 200px;
+        box-sizing: border-box;
       }
     }
   }
 `;
 
-const SelectLabel = styled.label`
+const InputLabel = styled.label`
   width: 200px;
   padding: 10px;
   font-size: ${fontSize.base};
+  box-sizing: border-box;
 `;
 
-const SelectFieldContainer = styled.div`
+const InputContainer = styled.div`
   display: inline-flex;
   align-items: center;
-`;
-
-const SelectField = styled.select`
-  width: 200px;
-  height: 35px;
-  font-size: 14px;
 `;
 
 const ActionContainer = styled.div`
@@ -69,50 +68,55 @@ const FormSection = styled.div`
   flex-direction: column;
 `;
 
-const SelectValue = styled.label`
+const InputValue = styled.label`
   width: 200px;
   font-weight: bold;
+  font-size: ${fontSize.large};
 `;
 
-const validationSchema = Yup.object().shape({
-  namespaces: Yup.string().required(),
-  version: Yup.string().required(),
-  replicas: Yup.number().required()
-});
+const CustomresourceEditForm = props => {
+  const { intl, namespaces, match, customResources } = props;
+  const customResource = customResources.find(
+    cr => cr.name === match.params.id
+  );
+  const initialValues = {
+    namespaces: customResource
+      ? customResource.namespace
+      : namespaces.length
+      ? namespaces[0].metadata.name
+      : '',
+    version: customResource ? customResource.version : '',
+    replicas: customResource ? customResource.replicas : '',
+    name: customResource ? customResource.name : ''
+  };
 
-class CustomresourceCreationForm extends React.Component {
-  render() {
-    const { intl, namespaces, match, customResources } = this.props;
-    const customResource = customResources.find(
-      cr => cr.name === match.params.id
-    );
-    const initialValues = {
-      namespaces: customResource
-        ? customResource.namespace
-        : namespaces.length
-        ? namespaces[0].metadata.name
-        : '',
-      version: customResource ? customResource.version : '',
-      replicas: customResource ? customResource.replicas : '',
-      name: customResource ? customResource.name : ''
-    };
+  const validationSchema = Yup.object().shape({
+    namespaces: Yup.string().required(),
+    version: Yup.string()
+      .required()
+      .test('is-version-valid', intl.messages.not_valid_version, value =>
+        semver.valid(value)
+      ),
+    replicas: Yup.number().required()
+  });
 
-    return (
-      <CreateCustomresourceContainter>
-        <CreateCustomresourceLayout>
+  return (
+    <CreateCustomresourceContainter>
+      <CreateCustomresourceLayout>
+        {customResource ? (
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
-            onSubmit={this.props.editCustomResource}
+            onSubmit={props.editCustomResource}
           >
-            {props => {
+            {formProps => {
               const {
                 values,
                 touched,
                 errors,
                 setFieldTouched,
                 setFieldValue
-              } = props;
+              } = formProps;
 
               //handleChange of the Formik props does not update 'values' when field value is empty
               const handleChange = field => e => {
@@ -125,34 +129,39 @@ class CustomresourceCreationForm extends React.Component {
               };
               //touched is not "always" correctly set
               const handleOnBlur = e => setFieldTouched(e.target.name, true);
-
+              const handleSelectChange = field => selectedObj => {
+                setFieldValue(field, selectedObj.value);
+              };
+              const options = namespaces.map(namespace => {
+                return {
+                  label: namespace.metadata.name,
+                  value: namespace.metadata.name
+                };
+              });
               return (
                 <Form>
                   <FormSection>
-                    <FormSectionTitle>Edit a Custom Resource</FormSectionTitle>
-                    <SelectFieldContainer>
-                      <SelectLabel>Name</SelectLabel>
-                      <SelectValue>{values.name}</SelectValue>
-                    </SelectFieldContainer>
-                    <SelectFieldContainer>
-                      <SelectLabel>{intl.messages.namespace}</SelectLabel>
-                      <SelectField
-                        name="namespaces"
-                        onChange={handleChange('namespaces')}
-                        value={values.namespaces}
-                        error={touched.namespaces && errors.namespaces}
-                        onBlur={handleOnBlur}
-                      >
-                        {namespaces.map((namespace, idx) => (
-                          <option
-                            key={`namespace_${idx}`}
-                            value={namespace.metadata.name}
-                          >
-                            {namespace.metadata.name}
-                          </option>
-                        ))}
-                      </SelectField>
-                    </SelectFieldContainer>
+                    <FormSectionTitle>
+                      {intl.messages.edit_customResource}
+                    </FormSectionTitle>
+                    <InputContainer>
+                      <InputLabel>{intl.messages.name}</InputLabel>
+                      <InputValue>{values.name}</InputValue>
+                    </InputContainer>
+                    <Input
+                      id="namespaces_input_creation"
+                      label={intl.messages.namespace}
+                      clearable={false}
+                      type="select"
+                      options={options}
+                      placeholder={intl.messages.select_a_namespace}
+                      noResultsText={intl.messages.not_found}
+                      name="namespaces"
+                      onChange={handleSelectChange('namespaces')}
+                      value={values.namespaces}
+                      error={touched.namespaces && errors.namespaces}
+                      onBlur={handleOnBlur}
+                    />
                     <Input
                       name="version"
                       label={intl.messages.version}
@@ -179,7 +188,7 @@ class CustomresourceCreationForm extends React.Component {
                             type="button"
                             outlined
                             onClick={() =>
-                              this.props.history.push('/customResource')
+                              props.history.push('/customResource')
                             }
                           />
                           <Button
@@ -195,11 +204,11 @@ class CustomresourceCreationForm extends React.Component {
               );
             }}
           </Formik>
-        </CreateCustomresourceLayout>
-      </CreateCustomresourceContainter>
-    );
-  }
-}
+        ) : null}
+      </CreateCustomresourceLayout>
+    </CreateCustomresourceContainter>
+  );
+};
 
 function mapStateToProps(state) {
   return {
@@ -219,6 +228,6 @@ export default injectIntl(
     connect(
       mapStateToProps,
       mapDispatchToProps
-    )(CustomresourceCreationForm)
+    )(CustomresourceEditForm)
   )
 );

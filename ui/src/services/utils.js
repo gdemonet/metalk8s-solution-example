@@ -1,5 +1,7 @@
 import { createSelector } from 'reselect';
 import { sortBy as sortByArray } from 'lodash';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 
 export const sortSelector = createSelector(
   (list, sortBy, sortDirection) => {
@@ -18,3 +20,13 @@ export const sortSelector = createSelector(
   },
   list => list
 );
+
+export const useRefreshEffect = (refreshAction, stopRefreshAction) => {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(refreshAction());
+    return () => {
+      dispatch(stopRefreshAction());
+    };
+  }, [dispatch, refreshAction, stopRefreshAction]);
+};

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { ThemeProvider } from 'styled-components';
@@ -8,127 +8,118 @@ import { withRouter, Switch } from 'react-router-dom';
 
 import { removeNotificationAction } from '../ducks/app/notifications';
 import CustomResource from './CustomResource';
-import NamespacesCreateForm from './NamespacesCreation';
 import CustomresourceCreation from './CustomresourceCreation';
 import CustomresourceEdit from './CustomresourceEdit';
-import DeployementEdit from './DeployementEdit';
-import { fetchCustomResourceAction } from '../ducks/app/customResource';
-import { fetchNamespacesAction } from '../ducks/app/namespaces';
-import { fetchDeployementAction } from '../ducks/app/deployment';
 
 import Welcome from '../components/Welcome';
 import PrivateRoute from './PrivateRoute';
 import { logoutAction } from '../ducks/login';
 import { toggleSidebarAction } from '../ducks/app/layout';
 
-class Layout extends Component {
-  componentDidMount() {
-    this.props.fetchNamespaces();
-    this.props.fetchCustomResource();
-    this.props.fetchDeployement();
+import {
+  refreshCustomResourceAction,
+  stopRefreshCustomResourceAction
+} from '../ducks/app/customResource.js';
 
-    this.interval = setInterval(() => {
-      this.props.fetchCustomResource();
-      this.props.fetchDeployement();
-    }, 15000);
-  }
+import {
+  refreshNamespacesAction,
+  stopRefreshNamespacesAction
+} from '../ducks/app/namespaces.js';
 
-  componentWillUnmount() {
-    clearInterval(this.interval);
-  }
+import { useRefreshEffect } from '../services/utils';
 
-  render() {
-    const applications = [];
+const Layout = props => {
+  useRefreshEffect(
+    refreshCustomResourceAction,
+    stopRefreshCustomResourceAction
+  );
+  useRefreshEffect(refreshNamespacesAction, stopRefreshNamespacesAction);
 
-    const help = [
-      {
-        label: this.props.intl.messages.about,
-        onClick: () => {
-          this.props.history.push('/about');
-        }
+  const applications = [];
+
+  const help = [
+    {
+      label: props.intl.messages.about,
+      onClick: () => {
+        props.history.push('/about');
       }
-    ];
+    }
+  ];
 
-    const user = {
-      name: this.props.user && this.props.user.username,
-      actions: [
-        { label: this.props.intl.messages.log_out, onClick: this.props.logout }
-      ]
-    };
+  const user = {
+    name: props.user && props.user.username,
+    actions: [{ label: props.intl.messages.log_out, onClick: props.logout }]
+  };
 
-    const sidebar = {
-      expanded: this.props.sidebar.expanded,
-      actions: [
-        {
-          label: this.props.intl.messages.nodes,
-          icon: <i className="fas fa-server" />,
-          onClick: () => {
-            this.props.history.push('/');
-          },
-          active: matchPath(this.props.history.location.pathname, {
+  const sidebar = {
+    expanded: props.sidebar.expanded,
+    actions: [
+      {
+        label: props.intl.messages.custom_resource,
+        icon: <i className="fas fa-server" />,
+        onClick: () => {
+          props.history.push('/');
+        },
+        active:
+          matchPath(props.history.location.pathname, {
             path: '/',
             exact: true,
             strict: true
+          }) ||
+          matchPath(props.history.location.pathname, {
+            path: '/customResource',
+            exact: false,
+            strict: true
           })
-        }
-      ]
-    };
+      }
+    ]
+  };
 
-    const navbar = {
-      onToggleClick: this.props.toggleSidebar,
-      toggleVisible: true,
-      productName: this.props.intl.messages.product_name,
-      applications,
-      help,
-      user: this.props.user && user,
-      logo: (
-        <img
-          alt="logo"
-          src={process.env.PUBLIC_URL + '/brand/assets/branding.svg'}
+  const navbar = {
+    onToggleClick: props.toggleSidebar,
+    toggleVisible: true,
+    productName: props.intl.messages.product_name,
+    applications,
+    help,
+    user: props.user && user,
+    logo: (
+      <img
+        alt="logo"
+        src={process.env.PUBLIC_URL + '/brand/assets/branding.svg'}
+      />
+    )
+  };
+
+  return (
+    <ThemeProvider theme={props.theme}>
+      <CoreUILayout sidebar={sidebar} navbar={navbar}>
+        <Notifications
+          notifications={props.notifications}
+          onDismiss={props.removeNotification}
         />
-      )
-    };
-
-    return (
-      <ThemeProvider theme={this.props.theme}>
-        <CoreUILayout sidebar={sidebar} navbar={navbar}>
-          <Notifications
-            notifications={this.props.notifications}
-            onDismiss={this.props.removeNotification}
+        <Switch>
+          <PrivateRoute exact path="/about" component={Welcome} />
+          <PrivateRoute
+            exact
+            path="/customResource"
+            component={CustomResource}
           />
-          <Switch>
-            <PrivateRoute exact path="/about" component={Welcome} />
-            <PrivateRoute
-              exact
-              path="/customResource"
-              component={CustomResource}
-            />
-            <PrivateRoute
-              exact
-              path="/customResource/:id/edit"
-              component={CustomresourceEdit}
-            />
-            <PrivateRoute
-              exact
-              path="/customResource/create"
-              component={CustomresourceCreation}
-            />
-            <PrivateRoute
-              exact
-              path="/namespaces/create"
-              component={NamespacesCreateForm}
-            />
-            <PrivateRoute
-              path="/namespaces/:id/deployments/:deploymentName/edit"
-              component={DeployementEdit}
-            />
-            <PrivateRoute exact path="/" component={CustomResource} />
-          </Switch>
-        </CoreUILayout>
-      </ThemeProvider>
-    );
-  }
-}
+          <PrivateRoute
+            exact
+            path="/customResource/:id/edit"
+            component={CustomresourceEdit}
+          />
+          <PrivateRoute
+            exact
+            path="/customResource/create"
+            component={CustomresourceCreation}
+          />
+          <PrivateRoute exact path="/" component={CustomResource} />
+        </Switch>
+      </CoreUILayout>
+    </ThemeProvider>
+  );
+};
 
 const mapStateToProps = state => ({
   user: state.login.user,
@@ -141,9 +132,6 @@ const mapDispatchToProps = dispatch => {
   return {
     logout: () => dispatch(logoutAction()),
     toggleSidebar: () => dispatch(toggleSidebarAction()),
-    fetchNamespaces: () => dispatch(fetchNamespacesAction()),
-    fetchCustomResource: () => dispatch(fetchCustomResourceAction()),
-    fetchDeployement: () => dispatch(fetchDeployementAction()),
     removeNotification: uid => dispatch(removeNotificationAction(uid))
   };
 };
