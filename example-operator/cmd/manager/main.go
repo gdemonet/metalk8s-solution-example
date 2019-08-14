@@ -13,6 +13,7 @@ import (
 
 	"example-operator/pkg/apis"
 	"example-operator/pkg/controller"
+	"example-operator/version"
 
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	kubemetrics "github.com/operator-framework/operator-sdk/pkg/kube-metrics"
@@ -42,6 +43,7 @@ func printVersion() {
 	log.Info(fmt.Sprintf("Go Version: %s", runtime.Version()))
 	log.Info(fmt.Sprintf("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH))
 	log.Info(fmt.Sprintf("Version of operator-sdk: %v", sdkVersion.Version))
+	log.Info(fmt.Sprintf("Version of example-operator: %v", version.Version))
 }
 
 func main() {

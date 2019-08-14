@@ -96,12 +96,15 @@ OPERATOR_BUILD_TARGET = $(call _built_tgt,$(OPERATOR_IMG_NAME))
 build_operator: $(OPERATOR_BUILD_TARGET)
 .PHONY: build_operator
 
+OPERATOR_BUILD_ARGS ?= \
+	--go-build-args "-ldflags -X=version.Version=$(VERSION_FULL)"
+
 # TODO: patch Dockerfile to include common labels
 $(OPERATOR_BUILD_TARGET): $(OPERATOR_SRC)
 	@echo Building Operator image "$(OPERATOR_IMG_NAME):$(VERSION_FULL)"...
 	@mkdir -p $(@D)
 	cd $(OPERATOR_SRC) && \
-		$(OPERATOR_SDK) $(OPERATOR_SDK_OPTS) build \
+		$(OPERATOR_SDK) $(OPERATOR_SDK_OPTS) build $(OPERATOR_BUILD_ARGS) \
 		$(OPERATOR_IMG_NAME):$(VERSION_FULL)
 	@touch $@
 	@echo Built Operator image.

@@ -6,6 +6,7 @@ import (
 	"os"
 
 	solutionv1alpha1 "example-operator/pkg/apis/solution/v1alpha1"
+	"example-operator/version"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -220,13 +221,14 @@ func (r *ReconcileExample) deploymentForExample(example *solutionv1alpha1.Exampl
 
 func labelsForExample(example *solutionv1alpha1.Example) map[string]string {
 	return map[string]string{
-		"app":                           "example",
-		"app.kubernetes.io/name":        "example",
-		"app.kubernetes.io/version":     example.Spec.Version,
-		"app.kubernetes.io/component":   "component",
-		"app.kubernetes.io/part-of":     "example-solution",
-		"app.kubernetes.io/managed-by":  "example-operator",
-		"example.solution.com/owner-cr": example.Name,
+		"app":                                   "example",
+		"app.kubernetes.io/name":                "example",
+		"app.kubernetes.io/version":             example.Spec.Version,
+		"app.kubernetes.io/component":           "component",
+		"app.kubernetes.io/part-of":             "example-solution",
+		"app.kubernetes.io/managed-by":          "example-operator",
+		"example.solution.com/cr-name":          example.Name,
+		"example.solution.com/operator-version": version.Version,
 	}
 }
 

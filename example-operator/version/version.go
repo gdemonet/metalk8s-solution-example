@@ -1,5 +1,4 @@
 package version
 
-var (
-	Version = "0.0.1"
-)
+// Version represents the software version of the Operator
+var Version string
