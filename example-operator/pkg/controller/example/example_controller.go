@@ -142,6 +142,30 @@ func (r *ReconcileExample) Reconcile(request reconcile.Request) (reconcile.Resul
 		return reconcile.Result{Requeue: true}, nil
 	}
 
+	// Ensure the version is the same as well
+	version := instance.Spec.Version
+	depLabels := found.ObjectMeta.Labels
+	deployedVersion, ok := depLabels["app.kubernetes.io/version"]
+	if !ok || deployedVersion != version {
+		// Update labels and image name
+		labels := labelsForExample(instance)
+		image := imageForExample(instance)
+		found.ObjectMeta.Labels = labels
+		found.Spec.Template.ObjectMeta.Labels = labels
+		found.Spec.Selector = &metav1.LabelSelector{
+			MatchLabels: labels,
+		}
+		found.Spec.Template.Spec.Containers[0].Image = image
+
+		err = r.client.Update(ctx, found)
+		if err != nil {
+			reqLogger.Error(err, "Failed to update Deployment", "Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
+			return reconcile.Result{}, err
+		}
+		// Spec updated - return and requeue
+		return reconcile.Result{Requeue: true}, nil
+	}
+
 	// Deployment already exists - don't requeue
 	reqLogger.Info("Skip reconcile: Deployment already exists", "Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
 	return reconcile.Result{}, nil
