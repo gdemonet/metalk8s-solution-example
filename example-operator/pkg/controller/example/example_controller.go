@@ -3,6 +3,7 @@ package example
 import (
 	"context"
 	"fmt"
+	"os"
 
 	solutionv1alpha1 "example-operator/pkg/apis/solution/v1alpha1"
 
@@ -171,7 +172,7 @@ func (r *ReconcileExample) deploymentForExample(example *solutionv1alpha1.Exampl
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
-						Image:   fmt.Sprintf("example-component:%s", example.Spec.Version),
+						Image:   imageForExample(example),
 						Name:    "example-component",
 						Command: []string{"python3", "/app/server.py"},
 						Ports: []corev1.ContainerPort{{
@@ -199,4 +200,16 @@ func labelsForExample(example *solutionv1alpha1.Example) map[string]string {
 		"app.kubernetes.io/managed-by":  "example-operator",
 		"example.solution.com/owner-cr": example.Name,
 	}
+}
+
+func imageForExample(example *solutionv1alpha1.Example) string {
+	prefix, found := os.LookupEnv("REGISTRY_PREFIX")
+	if !found {
+		prefix = "docker.io/metalk8s"
+	}
+
+	return fmt.Sprintf(
+		"%s/example-solution-%s/example-component:%s",
+		prefix, example.Spec.Version, example.Spec.Version,
+	)
 }
