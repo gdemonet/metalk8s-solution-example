@@ -90,9 +90,13 @@ func (r *ReconcileExample) Reconcile(request reconcile.Request) (reconcile.Resul
 	reqLogger.Info("Reconciling Example: START")
 	defer reqLogger.Info("Reconciling Example: STOP")
 
+	ctx, cancel := context.WithCancel(context.Background())
+	// Cancel the request context after Reconcile returns.
+	defer cancel()
+
 	// Fetch the Example instance
 	instance := &solutionv1alpha1.Example{}
-	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
+	err := r.client.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -108,12 +112,12 @@ func (r *ReconcileExample) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	// Check if the deployment already exists, if not create a new one
 	found := &appsv1.Deployment{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, found)
+	err = r.client.Get(ctx, types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new deployment
 		dep := r.deploymentForExample(instance)
 		reqLogger.Info("Creating a new Deployment", "Deployment.Namespace", dep.Namespace, "Deployment.Name", dep.Name)
-		err = r.client.Create(context.TODO(), dep)
+		err = r.client.Create(ctx, dep)
 		if err != nil {
 			reqLogger.Error(err, "Failed to create new Deployment", "Deployment.Namespace", dep.Namespace, "Deployment.Name", dep.Name)
 			return reconcile.Result{}, err
@@ -129,7 +133,7 @@ func (r *ReconcileExample) Reconcile(request reconcile.Request) (reconcile.Resul
 	size := instance.Spec.Replicas
 	if *found.Spec.Replicas != size {
 		found.Spec.Replicas = &size
-		err = r.client.Update(context.TODO(), found)
+		err = r.client.Update(ctx, found)
 		if err != nil {
 			reqLogger.Error(err, "Failed to update Deployment", "Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
 			return reconcile.Result{}, err
