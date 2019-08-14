@@ -174,7 +174,7 @@ UI_TARGETS := $(subst $(UI_SRC)/deploy,$(ISO_ROOT)/ui,$(UI_MANIFESTS))
 ui: $(UI_TARGETS)
 .PHONY: ui
 
-$(ISO_ROOT)/ui/%.yaml: $(UI_SRC)/deploy/%.yaml
+$(ISO_ROOT)/ui/%.yaml: $(UI_SRC)/deploy/%.yaml $(PWD)/VERSION
 	@echo Render $< into $@.
 	@mkdir -p $(@D)
 	@sed \
