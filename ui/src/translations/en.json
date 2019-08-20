@@ -5,5 +5,15 @@
   "submit": "Submit",
   "about": "About",
   "log_out": "Log out",
-  "nodes": "Nodes"
+  "nodes": "Nodes",
+  "create_new_namespaces": "Create New Namespace",
+  "create_new_customResource": "Create New Custom Resource",
+  "operator_version": "Operator Version",
+  "name": "Name",
+  "cancel": "Cancel",
+  "create": "Create",
+  "namespace": "Namespace",
+  "version": "Version",
+  "replicas": "Replicas",
+  "no_data_available": "No data available"
 }
