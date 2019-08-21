@@ -44,6 +44,8 @@ const SelectFieldContainer = styled.div`
 
 const SelectField = styled.select`
   width: 200px;
+  height: 35px;
+  font-size: 14px;
 `;
 
 const ActionContainer = styled.div`

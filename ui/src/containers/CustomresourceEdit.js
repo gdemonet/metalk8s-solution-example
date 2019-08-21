@@ -44,6 +44,8 @@ const SelectFieldContainer = styled.div`
 
 const SelectField = styled.select`
   width: 200px;
+  height: 35px;
+  font-size: 14px;
 `;
 
 const ActionContainer = styled.div`
@@ -67,11 +69,15 @@ const FormSection = styled.div`
   flex-direction: column;
 `;
 
+const SelectValue = styled.label`
+  width: 200px;
+  font-weight: bold;
+`;
+
 const validationSchema = Yup.object().shape({
   namespaces: Yup.string().required(),
   version: Yup.string().required(),
-  replicas: Yup.number().required(),
-  name: Yup.string().required()
+  replicas: Yup.number().required()
 });
 
 class CustomresourceCreationForm extends React.Component {
@@ -124,14 +130,10 @@ class CustomresourceCreationForm extends React.Component {
                 <Form>
                   <FormSection>
                     <FormSectionTitle>Edit a Custom Resource</FormSectionTitle>
-                    <Input
-                      name="name"
-                      label={intl.messages.name}
-                      value={values.name}
-                      onChange={handleChange('name')}
-                      error={touched.name && errors.name}
-                      onBlur={handleOnBlur}
-                    />
+                    <SelectFieldContainer>
+                      <SelectLabel>Name</SelectLabel>
+                      <SelectValue>{values.name}</SelectValue>
+                    </SelectFieldContainer>
                     <SelectFieldContainer>
                       <SelectLabel>{intl.messages.namespace}</SelectLabel>
                       <SelectField
