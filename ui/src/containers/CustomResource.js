@@ -63,7 +63,6 @@ const CustomResource = props => {
     sortBy,
     sortDirection
   );
-
   return (
     <PageContainer>
       <ActionContainer>
@@ -88,7 +87,9 @@ const CustomResource = props => {
           sortBy={sortBy}
           sortDirection={sortDirection}
           onSort={onSort}
-          onRowClick={() => {}}
+          onRowClick={row => {
+            history.push(`/customResource/${row.rowData.name}/edit`);
+          }}
           noRowsRenderer={() => (
             <NoRowsRenderer content={intl.messages.no_data_available} />
           )}
