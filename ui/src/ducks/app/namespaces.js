@@ -13,6 +13,7 @@ const FETCH_NAMESPACES = 'FETCH_NAMESPACES';
 const CREATE_NAMESPACES = 'CREATE_NAMESPACES';
 
 const UPDATE_NAMESPACES = 'UPDATE_NAMESPACES';
+const PART_OF_SOLUTION_LABEL = 'app.kubernetes.io/part-of';
 
 // Reducer
 const defaultState = {
@@ -45,7 +46,10 @@ export const createNamespacesAction = payload => {
 export function* createNamespaces({ payload }) {
   const body = {
     metadata: {
-      name: payload.name
+      name: payload.name,
+      labels: {
+        [PART_OF_SOLUTION_LABEL]: 'example-solution'
+      }
     }
   };
   const result = yield call(ApiK8s.createNamespace, body);
@@ -92,7 +96,15 @@ export function* createNamespaces({ payload }) {
 export function* fetchNamespaces() {
   const results = yield call(ApiK8s.getNamespaces);
   if (!results.error) {
-    yield put(updateNamespacesAction({ list: results.body.items }));
+    yield put(
+      updateNamespacesAction({
+        list: results.body.items.filter(
+          item =>
+            item.metadata.labels &&
+            item.metadata.labels[PART_OF_SOLUTION_LABEL] === 'example-solution'
+        )
+      })
+    );
   }
 }
 

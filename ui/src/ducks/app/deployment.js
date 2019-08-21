@@ -9,6 +9,7 @@ const UPDATE_DEPLOYMENT = 'UPDATE_DEPLOYMENT';
 const EDIT_DEPLOYMENT = 'EDIT_DEPLOYMENT';
 const DEPLOYMENT_VERSION_LABEL = 'metalk8s.scality.com/solution-version';
 const DEPLOYMENT_NAME_LABEL = 'metalk8s.scality.com/solution-name';
+const PART_OF_SOLUTION_LABEL = 'app.kubernetes.io/part-of';
 
 // Reducer
 const defaultState = {
@@ -43,17 +44,24 @@ export function* refreshDeployements() {
   if (!results.error) {
     yield put(
       updateDeployementAction({
-        list: results.body.items.map(item => {
-          return {
-            name: item.metadata.name,
-            namespace: item.metadata.namespace,
-            image: item.spec.template.spec.containers['0'].image,
-            version:
-              (item.metadata.labels &&
-                item.metadata.labels[DEPLOYMENT_VERSION_LABEL]) ||
-              ''
-          };
-        })
+        list: results.body.items
+          .filter(
+            item =>
+              item.metadata.labels &&
+              item.metadata.labels[PART_OF_SOLUTION_LABEL] ===
+                'example-solution'
+          )
+          .map(item => {
+            return {
+              name: item.metadata.name,
+              namespace: item.metadata.namespace,
+              image: item.spec.template.spec.containers['0'].image,
+              version:
+                (item.metadata.labels &&
+                  item.metadata.labels[DEPLOYMENT_VERSION_LABEL]) ||
+                ''
+            };
+          })
       })
     );
   }
@@ -128,7 +136,8 @@ export function* createDeployment(namespaces, operator_version) {
       name: 'example-operator',
       labels: {
         [DEPLOYMENT_VERSION_LABEL]: operator_version,
-        [DEPLOYMENT_NAME_LABEL]: 'ExampleSolution'
+        [DEPLOYMENT_NAME_LABEL]: 'ExampleSolution',
+        [PART_OF_SOLUTION_LABEL]: 'example-solution'
       }
     },
     spec: {
