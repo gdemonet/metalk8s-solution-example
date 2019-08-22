@@ -82,7 +82,15 @@ UI_BUILD_TARGET = $(call _built_tgt,$(UI_IMG_NAME))
 build_ui: $(UI_BUILD_TARGET)
 .PHONY: build_ui
 
-$(UI_BUILD_TARGET): $(UI_SRC)
+UI_IMG_DEPS := $(shell find $(UI_SRC) \
+	-path "$(UI_SRC)/deploy" -prune -or \
+	-type f \
+	-not -name ".*" -and \
+	-not -name "Dockerfile" -and \
+	-not -name "README.md" \
+	-print \
+)
+$(UI_BUILD_TARGET): $(UI_SRC)/Dockerfile $(UI_IMG_DEPS)
 	@echo Building UI image "$(UI_IMG_NAME):$(VERSION_FULL)"...
 	@mkdir -p $(@D)
 	docker build -t $(UI_IMG_NAME):$(VERSION_FULL) $(BUILD_ARGS) $(<D)
@@ -92,15 +100,18 @@ $(UI_BUILD_TARGET): $(UI_SRC)
 # Build Operator image
 OPERATOR_IMG_NAME ?= $(PRODUCT_LOWERNAME)-operator
 OPERATOR_BUILD_TARGET = $(call _built_tgt,$(OPERATOR_IMG_NAME))
-
 build_operator: $(OPERATOR_BUILD_TARGET)
 .PHONY: build_operator
 
+OPERATOR_IMG_DEPS := $(shell find $(OPERATOR_SRC) \
+	-path "$(OPERATOR_SRC)/deploy" -prune -or \
+	-path "$(OPERATOR_SRC)/build/_output" -prune -or \
+	-type f -not -name ".*" -print \
+)
 OPERATOR_BUILD_ARGS ?= \
 	--go-build-args "-ldflags -X=version.Version=$(VERSION_FULL)"
 
-# TODO: patch Dockerfile to include common labels
-$(OPERATOR_BUILD_TARGET): $(OPERATOR_SRC)
+$(OPERATOR_BUILD_TARGET): $(OPERATOR_IMG_DEPS)
 	@echo Building Operator image "$(OPERATOR_IMG_NAME):$(VERSION_FULL)"...
 	@mkdir -p $(@D)
 	cd $(OPERATOR_SRC) && \
@@ -114,8 +125,9 @@ STD_BUILD_TARGETS = $(foreach img,$(STD_IMAGES),$(call _built_tgt,$(img)))
 build_std_images: $(STD_BUILD_TARGETS)
 .PHONY: build_std_images
 
-$(BUILD_ROOT)/images/%/.built: $(IMAGES_SRC)/%
+$(BUILD_ROOT)/images/%/.built: $(IMAGES_SRC)/%/*
 	@echo Building component image "$*:$(VERSION_FULL)"
+	@echo All preprequisites for this component: $^
 	@mkdir -p $(@D)
 	$(DOCKER) $(DOCKER_OPTS) build -t $*:$(VERSION_FULL) $(BUILD_ARGS) $(<D)
 	@touch $@
