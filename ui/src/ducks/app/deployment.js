@@ -7,8 +7,8 @@ const CREATE_DEPLOYMENT = 'CREATE_DEPLOYMENT';
 const UPDATE_DEPLOYMENT = 'UPDATE_DEPLOYMENT';
 const EDIT_DEPLOYMENT = 'EDIT_DEPLOYMENT';
 
-export const DEPLOYMENT_VERSION_LABEL = 'metalk8s.scality.com/solution-version';
-const DEPLOYMENT_NAME_LABEL = 'metalk8s.scality.com/solution-name';
+export const DEPLOYMENT_VERSION_LABEL = 'app.kubernetes.io/version';
+const DEPLOYMENT_NAME_LABEL = 'app.kubernetes.io/name';
 export const PART_OF_SOLUTION_LABEL = 'app.kubernetes.io/part-of';
 
 // Reducer
