@@ -6,7 +6,7 @@ import {
   AppsV1Api
 } from '@kubernetes/client-node';
 
-import { PART_OF_SOLUTION_LABEL } from '../../ducks/app/deployment';
+import { LABEL_PART_OF } from '../../ducks/app/deployment';
 
 let config;
 let coreV1;
@@ -88,7 +88,7 @@ export async function getSolutionNamespaces() {
       null,
       null,
       null,
-      `${PART_OF_SOLUTION_LABEL}=example-solution`
+      `${LABEL_PART_OF}=example-solution`
     );
   } catch (error) {
     return { error };
@@ -101,7 +101,7 @@ export async function getSolutionDeployment(version) {
       null,
       null,
       null,
-      `${PART_OF_SOLUTION_LABEL}=example-solution`
+      `${LABEL_PART_OF}=example-solution`
     );
   } catch (error) {
     return { error };
