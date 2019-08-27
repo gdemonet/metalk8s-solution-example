@@ -2,7 +2,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: example-solution-ui
-  namespace: admin-uis
+  namespace: metalk8s-solutions
   labels:
     app: example-solution-ui
     heritage: example-solution

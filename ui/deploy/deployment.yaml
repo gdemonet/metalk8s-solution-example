@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: example-solution-ui
-  namespace: admin-uis
+  namespace: metalk8s-solutions
   labels:
     app: example-solution-ui
     heritage: example-solution
