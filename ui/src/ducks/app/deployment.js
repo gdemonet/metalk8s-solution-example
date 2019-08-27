@@ -50,9 +50,7 @@ export function* fetchSolutionDeployments() {
 
   if (!result.error) {
     const deployments = result.body.items.filter(
-      item =>
-        item.metadata.labels &&
-        item.metadata.labels[LABEL_PART_OF] === SOLUTION_NAME
+      item => item.metadata.name === DEPLOYMENT_NAME
     );
 
     const flattenedItems = deployments.map(item => ({
