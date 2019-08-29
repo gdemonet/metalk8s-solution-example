@@ -125,8 +125,8 @@ const operatorDeployment = (registryPrefix, version) => ({
           name: OPERATOR_NAME
         }
       },
-      serviceAccountName: DEPLOYMENT_NAME,
       spec: {
+        serviceAccountName: DEPLOYMENT_NAME,
         containers: [
           {
             name: OPERATOR_NAME,
