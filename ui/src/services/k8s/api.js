@@ -3,7 +3,8 @@ import {
   Config,
   CoreV1Api,
   CustomObjectsApi,
-  AppsV1Api
+  AppsV1Api,
+  RbacAuthorizationV1Api
 } from '@kubernetes/client-node';
 
 import { LABEL_PART_OF } from '../../ducks/app/deployment';
@@ -13,6 +14,7 @@ let coreV1;
 let customObjects;
 let k8sApiClient = null;
 let appsV1Api;
+let rbacAuthorizationV1Api;
 
 export function initialize(apiUrl) {
   k8sApiClient = new ApiClient({ apiUrl });
@@ -32,6 +34,7 @@ export const updateApiServerConfig = (url, token) => {
   coreV1 = config.makeApiClient(CoreV1Api);
   customObjects = config.makeApiClient(CustomObjectsApi);
   appsV1Api = config.makeApiClient(AppsV1Api);
+  rbacAuthorizationV1Api = config.makeApiClient(RbacAuthorizationV1Api);
 };
 
 export async function getCustomResource() {
@@ -111,6 +114,33 @@ export async function getSolutionDeployment(version) {
 export async function createNamespacedDeployment(namespaces, body) {
   try {
     return await appsV1Api.createNamespacedDeployment(namespaces, body);
+  } catch (error) {
+    return { error };
+  }
+}
+
+export async function createNamespacedServiceAccount(namespaces, body) {
+  try {
+    return await coreV1.createNamespacedServiceAccount(namespaces, body);
+  } catch (error) {
+    return { error };
+  }
+}
+
+export async function createNamespacedRole(namespaces, body) {
+  try {
+    return await rbacAuthorizationV1Api.createNamespacedRole(namespaces, body);
+  } catch (error) {
+    return { error };
+  }
+}
+
+export async function createNamespacedRoleBinding(namespaces, body) {
+  try {
+    return await rbacAuthorizationV1Api.createNamespacedRoleBinding(
+      namespaces,
+      body
+    );
   } catch (error) {
     return { error };
   }

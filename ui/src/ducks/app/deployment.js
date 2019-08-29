@@ -1,4 +1,4 @@
-import { call, put, takeEvery, select } from 'redux-saga/effects';
+import { all, call, put, takeEvery, select } from 'redux-saga/effects';
 
 import * as ApiK8s from '../../services/k8s/api';
 import history from '../../history';
@@ -85,12 +85,27 @@ export function* createDeployment(namespaces, operator_version) {
   );
 
   const body = operatorDeployment(registry_prefix, operator_version);
-  const result = yield call(
-    ApiK8s.createNamespacedDeployment,
-    namespaces,
-    body
-  );
-  return result;
+
+  const rbacResults = yield all([
+    yield call(
+      ApiK8s.createNamespacedServiceAccount,
+      namespaces,
+      serviceAccountBody
+    ),
+    yield call(ApiK8s.createNamespacedRole, namespaces, roleBody),
+    yield call(ApiK8s.createNamespacedRoleBinding, namespaces, roleBindingBody)
+  ]);
+
+  const resultError = rbacResults.find(result => result.error);
+  if (!resultError) {
+    const result = yield call(
+      ApiK8s.createNamespacedDeployment,
+      namespaces,
+      body
+    );
+    return result;
+  }
+  return resultError;
 }
 
 // Helpers
@@ -131,7 +146,7 @@ const operatorDeployment = (registryPrefix, version) => ({
           {
             name: OPERATOR_NAME,
             image: operatorImage(registryPrefix, version),
-            command: ['example-operator'],
+            command: [DEPLOYMENT_NAME],
             imagePullPolicy: 'Always',
             env: [
               {
@@ -165,6 +180,86 @@ const operatorDeployment = (registryPrefix, version) => ({
     }
   }
 });
+
+const serviceAccountBody = {
+  apiVersion: 'v1',
+  kind: 'ServiceAccount',
+  metadata: {
+    name: DEPLOYMENT_NAME
+  }
+};
+const roleBody = {
+  apiVersion: 'rbac.authorization.k8s.io/v1',
+  kind: 'Role',
+  metadata: {
+    creationTimestamp: null,
+    name: DEPLOYMENT_NAME
+  },
+  rules: [
+    {
+      apiGroups: [''],
+      resources: [
+        'pods',
+        'services',
+        'endpoints',
+        'persistentvolumeclaims',
+        'events',
+        'configmaps',
+        'secrets'
+      ],
+      verbs: ['*']
+    },
+    {
+      apiGroups: ['apps'],
+      resources: ['deployments', 'daemonsets', 'replicasets', 'statefulsets'],
+      verbs: ['*']
+    },
+    {
+      apiGroups: ['monitoring.coreos.com'],
+      resources: ['servicemonitors'],
+      verbs: ['get', 'create']
+    },
+    {
+      apiGroups: ['apps'],
+      resourceNames: [DEPLOYMENT_NAME],
+      resources: ['deployments/finalizers'],
+      verbs: ['update']
+    },
+    {
+      apiGroups: [''],
+      resources: ['pods'],
+      verbs: ['get']
+    },
+    {
+      apiGroups: ['apps'],
+      resources: ['replicasets'],
+      verbs: ['get']
+    },
+    {
+      apiGroups: ['solution.com'],
+      resources: ['*'],
+      verbs: ['*']
+    }
+  ]
+};
+const roleBindingBody = {
+  kind: 'RoleBinding',
+  apiVersion: 'rbac.authorization.k8s.io/v1',
+  metadata: {
+    name: DEPLOYMENT_NAME
+  },
+  subjects: [
+    {
+      kind: 'ServiceAccount',
+      name: DEPLOYMENT_NAME
+    }
+  ],
+  roleRef: {
+    kind: 'Role',
+    name: DEPLOYMENT_NAME,
+    apiGroup: 'rbac.authorization.k8s.io'
+  }
+};
 
 export function* deploymentSaga() {
   yield takeEvery(CREATE_DEPLOYMENT, createDeployment);
